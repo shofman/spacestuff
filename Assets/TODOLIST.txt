@@ -1,0 +1,13 @@
+Bugs
+====
+* Bug where ships can fly between different galaxies without connecting trade route
+* Bug where a second fleet on the planet removes the ability to select that fleet
+
+Features
+========
+* Fleets need to specify an allegiance
+* Randomly generated textures on the planets
+* Unit tests
+* Battles between differing allegiances
+* Movements between galaxies
+* Refactor fleets within planets code away into separate class
