@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
@@ -345,6 +346,18 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     }
 
     /**
+     * Removes the fleet at the given index
+     */
+    public void removeFleet(int index) {
+        try {
+            fleetOverPlanet.RemoveAt(index);
+            shipDisplay.GetComponent<ShipDisplay>().validateMoveShipButton();
+        } catch (ArgumentOutOfRangeException e) {
+            Debug.Log("Trying to remove fleet that does not exist");
+        } 
+    }
+
+    /**
      * Finds the fleet above the planet
      * @return GameObject the fleet currently above the planet
      */
@@ -389,8 +402,12 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
         if (planetToMoveTo.GetInstanceID() != this.gameObject.GetInstanceID()) {
             GameObject fleet = getFleetOverPlanet();
             GameObject[] planetsToMoveThrough = galaxy.GetComponent<Galaxy>().bfsGalaxy(this.gameObject, planetToMoveTo);
+            
+            // TODO - make this not always the first entry
+            removeFleet(0);
+            
+
             fleet.GetComponent<Fleet>().moveFleet(planetsToMoveThrough);
-            setFleet(null);
         }
     }
 }

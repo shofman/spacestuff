@@ -13,7 +13,6 @@ public class PlanetProduction : MonoBehaviour {
     RandomLetters shipNameGenerator;
 
     void Awake() {
-        shipNameGenerator = new RandomLetters(3);
     }
 
     void Start() {
@@ -30,6 +29,8 @@ public class PlanetProduction : MonoBehaviour {
      *
      */
     public void createShip() {
+        // This needs to be initialized here to ensure each planet creates it's own random generator
+        shipNameGenerator = new RandomLetters(3);
         List<GameObject> fleets = gameObject.GetComponent<Planet>().getFleetsOverPlanet();
         GameObject fleet;
         if (!fleets.Any()) {
