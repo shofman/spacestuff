@@ -38,7 +38,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     // Whether we have visited this galaxy before (for searches)
     bool hasVisited = false;
 
-    // What the previous galaxy we visited before this one (for identifying distances)
+    // What the previous galaxy we visited before this one (for identifying distances in bfs)
     GameObject priorGameObject;
 
     // The name of this galaxy
@@ -47,11 +47,6 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     //Initial position in global array holding position
     int universePositionX = -1;
     int universePositionY = -1;
-
-    // Total number of units used per galaxy
-    public int blueUnits = 20;
-    public int redUnits = 20;
-
     
     /**
      * On intialization, create necessary child gameobjects, setup random generator, and initialize required variables
@@ -135,6 +130,8 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
                 newPlanet.changeColorAndSetUnits(Color.red, 2);
                 totalRedPlanets--;
             }
+
+            newPlanet.createRandomTexture();
         }
         connectAllPlanets();
         removeConnections();

@@ -41,6 +41,9 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
 
     private GameObject galaxy;
 
+    private Color planetColor;
+    private GameObject nameDisplay;
+
     // Boolean for detecting whether we are trying to transfer a fleet to this planet
     bool isTransferingAFleet = false;
 
@@ -204,6 +207,10 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
         }
     }
 
+    public void createRandomTexture() {
+        this.gameObject.GetComponent<RandomTexture>().createTexture();
+    }
+
     /**
      * Sets the color of the trade route between planets
      * @param Color - the color we want the trade route to be represented by
@@ -227,7 +234,7 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
         this.planetName = name;
         if (!createdNameObject) {
             createdNameObject = true;
-            GameObject nameDisplay = (GameObject) Instantiate(planetNameDisplay);
+            nameDisplay = (GameObject) Instantiate(planetNameDisplay);
             nameDisplay.transform.parent = this.transform;
             nameDisplay.transform.position = this.transform.position;
             nameDisplay.transform.position -= new Vector3(2.3f,5,0);
@@ -259,7 +266,10 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
      * @param Color - the color we want to set the planet to
      */
     public void setToColor(Color c) {
-        GetComponent<Renderer>().material.SetColor("_Color", c);
+        planetColor = c;
+        if (nameDisplay != null) {
+            nameDisplay.GetComponent<TextMesh>().color = planetColor;
+        }
     }
 
     /**
