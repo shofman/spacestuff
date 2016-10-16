@@ -7,82 +7,56 @@ public class RandomTexture : MonoBehaviour {
     private Texture2D noiseTex;
     private Color[] pix;
     private Renderer rend;
-    private System.Random generator;
 
     // public float scale = 6.0f;
-    public float xOrg = 0.0f;
-    public float yOrg = 0.0f;
-    public float xOrg2 = 0.0f;
-    public float yOrg2 = 0.0f;
-    public int pixWidth = 128;
-    public int pixHeight = 128;
-    public bool checkedValue = false;
+    private float xOrg;
+    private float yOrg;
+    private float xOrg2;
+    private float yOrg2;
+    private int pixWidth = 128;
+    private int pixHeight = 128;
 
     void Awake() {
-        rend = GetComponent<Renderer>();
-        // noiseTex = new Texture2D(pixWidth, pixHeight);
-        // pix = new Color[noiseTex.width * noiseTex.height];
-        // rend.material.mainTexture = noiseTex;
-        // generator = new System.Random();
-        // xOrg = UnityEngine.Random.Range(-1000.0f, 1000.0f);
-        // yOrg = UnityEngine.Random.Range(-1000.0f, 1000.0f);
-
-        // xOrg2 = UnityEngine.Random.Range(-1000.0f, 1000.0f);
-        // yOrg2 = UnityEngine.Random.Range(-1000.0f, 1000.0f);        
+        rend = GetComponent<Renderer>();        
     }
 
-    void Start () {
+    /**
+     * Public method that allows external object to create textures for the planet
+     */
+    public void createTexture() {
+        noiseTex = new Texture2D(pixWidth, pixHeight);
+        pix = new Color[noiseTex.width * noiseTex.height];
+        rend.material.mainTexture = noiseTex;
+        xOrg = UnityEngine.Random.Range(-1000.0f, 1000.0f);
+        yOrg = UnityEngine.Random.Range(-1000.0f, 1000.0f);
+
+        xOrg2 = UnityEngine.Random.Range(-1000.0f, 1000.0f);
+        yOrg2 = UnityEngine.Random.Range(-1000.0f, 1000.0f);
+
+        calcAndApplyTexture();
     }
 
-    void calcNoise() {
+    /**
+     * Calculates a random texture based off perlin noise and sets the gameObject's texture to that random texture
+     */
+    void calcAndApplyTexture() {
         for (float y=0.0f; y<noiseTex.height; y++) {
             for (float x=0.0f; x<noiseTex.width; x++) {
-                // THIS IS GOOD HERE
-                float scale = 3f;
-                float xCoord = xOrg + x / noiseTex.width * scale;
-                float yCoord = yOrg + y / noiseTex.height * scale;
-                float sample = Mathf.PerlinNoise(xCoord, yCoord);
+                // Combine three samples of perlin noise, at different scales, to create a smooth approximation
+                float sample = getPerlinNoiseSample(3.0f, x, y, xOrg, yOrg);
+                sample += .5f * getPerlinNoiseSample(6.0f, x,y, xOrg, yOrg);
+                sample += .25f * getPerlinNoiseSample(30.0f, x,y, xOrg, yOrg);
 
-                scale = 6f;
-                xCoord = xOrg + x / noiseTex.width * scale;
-                yCoord = yOrg + y / noiseTex.height * scale;
-                sample += .5f * Mathf.PerlinNoise(xCoord, yCoord);
+                // Create a different map to approximate humidity mapping
+                float sample2 = getPerlinNoiseSample(2.0f, x, y, xOrg2, yOrg2);
+                sample2 += .5f * getPerlinNoiseSample(8.0f, x,y, xOrg2, yOrg2);
+                sample2 += .25f * getPerlinNoiseSample(20.0f, x,y, xOrg2, yOrg2);
 
-                scale = 30f;
-                xCoord = xOrg + x / noiseTex.width * scale;
-                yCoord = yOrg + y / noiseTex.height * scale;
-                sample += .25f * Mathf.PerlinNoise(xCoord, yCoord);
-
-                scale = 2f;
-                xCoord = xOrg2 + x / noiseTex.width * scale;
-                yCoord = yOrg2 + y / noiseTex.height * scale;
-                float sample2 = Mathf.PerlinNoise(xCoord, yCoord);
-
-                scale = 8f;
-                xCoord = xOrg2 + x / noiseTex.width * scale;
-                yCoord = yOrg2 + y / noiseTex.height * scale;
-                sample2 += .5f * Mathf.PerlinNoise(xCoord, yCoord);
-
-                scale = 20f;
-                xCoord = xOrg2 + x / noiseTex.width * scale;
-                yCoord = yOrg2 + y / noiseTex.height * scale;
-                sample2 += .25f * Mathf.PerlinNoise(xCoord, yCoord);
-
-
+                // Raise exponentially to create greater differences between valleys and peaks 
                 sample = (float)Math.Pow(sample, 2.0f);
                 sample2 = (float)Math.Pow(sample2, 2.0f);
-                // if (sample > max) {
-                //     max = sample;
-                // }
-                // if (sample < min) {
-                //     min = sample;
-                // }
-                // avg += sample;
 
-                Color newColor2 = new Color(sample2, sample2, sample2);
-                Color newColor = new Color(sample, sample, sample);
-
-                newColor = biome(sample, sample2);
+                Color newColor = biome(sample, sample2);
                 pix[(int) (y * noiseTex.width + x)] = newColor;
             }
         }
@@ -92,41 +66,28 @@ public class RandomTexture : MonoBehaviour {
         GetComponent<Renderer>().material.mainTexture = noiseTex;
     }
 
-
-    // Update is called once per frame
-    void Update () {
-
+    /**
+     * Gets a perlin noise value at a specific point, adjusted by a scale
+     * 
+     * float scale - How much we are going to adjust the scaling by
+     * float x - The x coordinate of the point we are attempting to calculate
+     * float y - The y coordinate of the point we are attempting to calculate
+     * float originX - The x coordinate of the point we want to sample
+     * float originY - The y coordinate of the point we want to sample
+     * returns - A value between 0 and 1 representing a random noise sampling
+     */
+    private float getPerlinNoiseSample(float scale, float x, float y, float xOrigin, float yOrigin) {
+        float xCoord = xOrigin + x / noiseTex.width * scale;
+        float yCoord = yOrigin + y / noiseTex.height * scale;
+        return Mathf.PerlinNoise(xCoord, yCoord);
     }
 
-    public void createTexture() {
-        noiseTex = new Texture2D(pixWidth, pixHeight);
-        pix = new Color[noiseTex.width * noiseTex.height];
-        rend.material.mainTexture = noiseTex;
-        generator = new System.Random();
-        xOrg = UnityEngine.Random.Range(-1000.0f, 1000.0f);
-        yOrg = UnityEngine.Random.Range(-1000.0f, 1000.0f);
-
-        xOrg2 = UnityEngine.Random.Range(-1000.0f, 1000.0f);
-        yOrg2 = UnityEngine.Random.Range(-1000.0f, 1000.0f);
-
-        calcNoise();
-
-        // // Create a new 2x2 texture ARGB32 (32 bit with alpha) and no mipmaps
-        // Texture2D texture = new Texture2D(2, 2, TextureFormat.ARGB32, false);
-        
-        // // set the pixel values
-        // texture.SetPixel(0, 0, Color.red);
-        // texture.SetPixel(1, 0, Color.clear);
-        // texture.SetPixel(0, 1, Color.white);
-        // texture.SetPixel(1, 1, Color.black);
-        
-        // Apply all SetPixel calls
-        // texture.Apply();
-        
-        // connect texture to material of GameObject this script is attached to
-        // GetComponent<Renderer>().material.mainTexture = texture;
-    }
-
+    /**
+     * Generates a biome with predominantly water based off of two random values between 0 and 1
+     * float heightMapValue - A random value between 0 and 1, representing the height of the world at that point
+     * float moistureMapValue - A random value between 0 and 1, representing the moisture of the world at that point
+     * return Color - a new color based off the information about height and moisture
+     */
     private Color waterBiome(float heightMapValue, float moistureMapValue) {
       if (heightMapValue < 0.5) return Color.green; // Ocean
       if (heightMapValue < 0.55) return Color.yellow; // Beach
@@ -160,16 +121,13 @@ public class RandomTexture : MonoBehaviour {
       return Color.white;
     }
 
+    /**
+     * Generates a biome with predominantly earth-like attributes, based off of two random values between 0 and 1
+     * float heightMapValue - A random value between 0 and 1, representing the height of the world at that point
+     * float moistureMapValue - A random value between 0 and 1, representing the moisture of the world at that point
+     * return Color - a new color based off the information about height and moisture
+     */
     private Color biome(float heightMapValue, float moistureMapValue) {
-        // if (sample < 0.5) {
-        //     newColor = Color.blue;
-        // } else if (sample < .6) {
-        //     newColor = Color.yellow;
-        // } else if (sample < .8) {
-        //     newColor = Color.green;
-        // } else {
-        //     newColor = Color.white;
-        // }
       if (heightMapValue < 0.5) return Color.blue; // Ocean
       if (heightMapValue < 0.6) return Color.yellow; // Beach
       

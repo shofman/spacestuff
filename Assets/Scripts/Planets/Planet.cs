@@ -364,6 +364,7 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
             shipDisplay.GetComponent<ShipDisplay>().validateMoveShipButton();
         } catch (ArgumentOutOfRangeException e) {
             Debug.Log("Trying to remove fleet that does not exist");
+            Debug.Log(e.ToString());
         } 
     }
 
