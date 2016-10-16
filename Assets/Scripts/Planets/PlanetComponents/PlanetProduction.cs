@@ -58,6 +58,7 @@ public class PlanetProduction : MonoBehaviour {
             GameObject fleet = (GameObject) Instantiate(fleetObject);
             fleet.transform.position = gameObject.transform.position;
             fleet.GetComponent<Fleet>().setFleetAllegiance(planetAllegiance);
+            fleet.GetComponent<Fleet>().orbitPlanet(gameObject);
             planet.setFleet(fleet);
             return fleet;
         } else {

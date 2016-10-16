@@ -6,6 +6,7 @@ using System;
 public class Ship : MonoBehaviour {
     public int health = 10;
     public int shields = 1;
+    public int attack = 1;
     public string shipName = "";
 
     private GameObject fleet;
@@ -60,5 +61,12 @@ public class Ship : MonoBehaviour {
      */
     public string getName() {
         return shipName;
+    }
+
+    /**
+     * Returns the attack of the ship
+     */
+    public int getAttack() {
+        return attack;
     }
 }

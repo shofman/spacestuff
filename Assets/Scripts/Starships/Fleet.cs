@@ -12,15 +12,21 @@ public class Fleet : MonoBehaviour {
     List<GameObject> planets;
     GameObject newMovementTarget;
 
+    GameObject orbitingPlanet;
+
     private Color allegiance;
     
     void Awake() {
         shipsInFleet = new List<GameObject>();
         planets = new List<GameObject>();
+        orbitingPlanet = null;
     }
 
     void Update() {
         moveShips();
+        if (Input.GetKeyDown("d")) {
+            listPlanet();
+        }
     }
 
     /**
@@ -59,6 +65,22 @@ public class Fleet : MonoBehaviour {
     }
 
     /**
+     * Lists the planet that the fleet is currently around
+     */
+    public void listPlanet() {
+        if (orbitingPlanet != null) {
+            Debug.Log(orbitingPlanet.GetComponent<Planet>().getName());
+        }
+    }
+
+    /**
+     * Returns a list of all the ships in this current fleet
+     */
+    public List<GameObject> getShipsInFleet() {
+        return shipsInFleet;
+    }
+
+    /**
      * Moves the fleet along the quickest path of planets towards the target goal
      */
     public void moveFleet(GameObject[] listOfPlanets) {
@@ -66,7 +88,20 @@ public class Fleet : MonoBehaviour {
             isMoving = true;
             planets = listOfPlanets.ToList();
             newMovementTarget = popNextDestination();
+            orbitingPlanet = null;
         }
+    }
+
+    public void destroyFleet() {
+        if (orbitingPlanet != null) {
+            orbitingPlanet.GetComponent<Planet>().removeFleet(gameObject);
+        }
+        Destroy(gameObject);
+        // TODO - Remove fleet from planet (in the case of defense)
+    }
+
+    public void orbitPlanet(GameObject planet) {
+        orbitingPlanet = planet;
     }
 
     /**
@@ -81,14 +116,60 @@ public class Fleet : MonoBehaviour {
                 float step = speed * Time.deltaTime;
                 setFleetPosition(Vector3.MoveTowards(gameObject.transform.position, position, step));
             } else {
-                if (planets.Count > 0) {
-                    newMovementTarget = popNextDestination();
-                } else {
-                    newMovementTarget.GetComponent<Planet>().setFleet(this.gameObject);
+                if (isEnemyFleetAtPlanet()) {
                     isMoving = false;
+                    List<GameObject> possibleFleets = getVisitingPlanetFleets();
+                    engageEnemy(possibleFleets[0]);
+                } else {
+                    continueMovingOrStop();
                 }
             }
         }
+    }
+
+    /**
+     * Checks to see if the fleet has arrived at its target destination
+     * If it has, add the fleet to the planet, and stop moving
+     * Otherwise, continue moving
+     */
+    private void continueMovingOrStop() {
+        if (planets.Count > 0) {
+            newMovementTarget = popNextDestination();
+        } else {
+            newMovementTarget.GetComponent<Planet>().setFleet(this.gameObject);
+            isMoving = false;
+            orbitPlanet(newMovementTarget);
+        }
+    }
+
+    /**
+     * Fetch the fleets over the current planet we are traveling through
+     * @return List - List containing all the fleets over planet (can be empty)
+     */
+    private List<GameObject> getVisitingPlanetFleets() {
+        return newMovementTarget.GetComponent<Planet>().getFleetsOverPlanet();
+    }
+
+    /**
+     * Determines whether there is a fleet already present at the newly arrived planet
+     * @return bool - Whether or not there is an enemy fleet at the current planet
+     */
+    private bool isEnemyFleetAtPlanet() {
+        List<GameObject> possibleFleets = getVisitingPlanetFleets();
+        if (possibleFleets.Any()) {
+            //TODO - Just checking the first one. If there is a concept of alliances, and multiple types on planet, may need more
+            Color otherFleetAllegiance = possibleFleets[0].GetComponent<Fleet>().getFleetAllegiance();
+            return otherFleetAllegiance != getFleetAllegiance();
+        }
+        return false;
+    }
+
+    /**
+     * Begins a combat with an enemy fleet
+     */
+    private void engageEnemy(GameObject enemyFleet) {
+        FleetCombat combat = new FleetCombat();
+        combat.resolveCombat(gameObject, enemyFleet);
     }
 
     /**
@@ -106,6 +187,4 @@ public class Fleet : MonoBehaviour {
         planets.RemoveAt(0);
         return removal;
     }
-
-
 }

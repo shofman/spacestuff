@@ -22,7 +22,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     // List of planets within this galaxy
     GameObject[,] listOfPlanets;
 
-    // Empty game object to hold collections of gameobjects
+    // Empty game object to hold collections of gameObject
     GameObject planetsHolder;
     GameObject tradeRouteHolder;
 
@@ -49,7 +49,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     int universePositionY = -1;
     
     /**
-     * On intialization, create necessary child gameobjects, setup random generator, and initialize required variables
+     * On intialization, create necessary child gameObject, setup random generator, and initialize required variables
      */
     void Awake() {
         planetsHolder = createEmptyGameObject("PlanetsHolder");
@@ -60,7 +60,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
 
     /**
      * Finds a game object of the children with a particular name, or creates it
-     * @param name - The name of the parent gameobject we are wanting to find the game object
+     * @param name - The name of the parent gameObject we are wanting to find the game object
      * @return GameObject - created or found game object with the given name
      */
     GameObject createEmptyGameObject(string name) {

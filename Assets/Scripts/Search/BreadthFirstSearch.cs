@@ -7,7 +7,7 @@ public class BreadthFirstSearch : MonoBehaviour {
 
     /**
      * Perform a breadth first search on the type T
-     * T - The gameobject we want to perform the bfs on
+     * T - The gameObject we want to perform the bfs on
      * @type gameObject
      * @param initialNode - starting node for the search
      * @param Array representing the graph we are performing the search throughout
@@ -45,12 +45,12 @@ public class BreadthFirstSearch : MonoBehaviour {
     }
 
     /**
-     * Perform a breadth first search on the type T and return 
-     * T - The gameobject we want to perform the bfs on
+     * Perform a breadth first search on the type T and return an array of how to reach that planet
+     * T - The gameObject we want to perform the bfs on
      * @type gameObject
-     * @param initialNode - starting node for the search
      * @param Array representing the graph we are performing the search throughout
-     * @param displayNames - boolean for displaying the name as we perform the search
+     * @param initialNode - starting node for the search
+     * @param targetNode - node that we want to find the path towards
      */
     public GameObject[] breadthFirstSearchPath <T> (GameObject[,] listOfPlanets, GameObject initialNode, GameObject targetNode) where T : Component, IBreadthFirstSearchInterface {
         if (initialNode.GetInstanceID() == targetNode.GetInstanceID()) {

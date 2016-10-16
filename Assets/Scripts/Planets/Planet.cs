@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
@@ -186,7 +187,7 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
 
     /**
      * Creates a number of lineRenderers to represent the trade routes between planets
-     * @param  GameObject - an empty gameobject holder to house the created trade route objects
+     * @param  GameObject - an empty gameObject holder to house the created trade route objects
      */
     public void displayTradeRoutes(GameObject tradeRouterHolder) {
         for (int i=listOfRoutes.Count-1; i >=0; i--) {
@@ -376,7 +377,19 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     }
 
     /**
+     * Removes the fleet matching the instance ID of the GameObject provided
+     */
+    public void removeFleet(GameObject fleetToRemove) {
+        int fleetId = fleetToRemove.GetInstanceID();
+        var item = fleetOverPlanet.SingleOrDefault(x => x.GetInstanceID() == fleetId);
+        if (item != null) {
+            fleetOverPlanet.Remove(item);
+        }
+    } 
+
+    /**
      * Finds the fleet above the planet
+     * TODO - Replace with selector to choose which fleet if multiple
      * @return GameObject the fleet currently above the planet
      */
     public GameObject getFleetOverPlanet() {

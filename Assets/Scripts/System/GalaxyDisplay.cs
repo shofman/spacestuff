@@ -66,7 +66,7 @@ public class GalaxyDisplay : MonoBehaviour {
 	}
 
 	/**
-	 * Add a galaxy overlay UI gameobject to the list of toggable states
+	 * Add a galaxy overlay UI gameObject to the list of toggable states
 	 * @param The galaxy overlay game object we want to add
 	 * @param The name that it should display when visible
 	 */
