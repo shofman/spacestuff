@@ -92,14 +92,24 @@ public class Fleet : MonoBehaviour {
         }
     }
 
+    /**
+     * Removes the fleet from any associated planets, and destroys the game object 
+     */
     public void destroyFleet() {
         if (orbitingPlanet != null) {
             orbitingPlanet.GetComponent<Planet>().removeFleet(gameObject);
         }
         Destroy(gameObject);
-        // TODO - Remove fleet from planet (in the case of defense)
     }
 
+    public void landOnPlanet() {
+        orbitPlanet(newMovementTarget);
+        newMovementTarget.GetComponent<Planet>().setFleet(this.gameObject);
+    }
+
+    /**
+     * Sets the planet 
+     */
     public void orbitPlanet(GameObject planet) {
         orbitingPlanet = planet;
     }

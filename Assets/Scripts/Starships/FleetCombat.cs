@@ -20,6 +20,7 @@ public class FleetCombat {
         
         if (attackStrength > defenseStrength) {
             defenseFleet.destroyFleet();
+            attackFleet.landOnPlanet();
         } else {
             attackFleet.destroyFleet();
         }

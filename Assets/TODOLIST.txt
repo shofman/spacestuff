@@ -10,8 +10,7 @@ Bugs
     UnityEngine.EventSystems.ExecuteEvents.Execute (IPointerClickHandler handler, UnityEngine.EventSystems.BaseEventData eventData) (at C:/buildslave/unity/build/Extensions/guisystem/UnityEngine.UI/EventSystem/ExecuteEvents.cs:52)
     UnityEngine.EventSystems.ExecuteEvents.Execute[IPointerClickHandler] (UnityEngine.GameObject target, UnityEngine.EventSystems.BaseEventData eventData, UnityEngine.EventSystems.EventFunction`1 functor) (at C:/buildslave/unity/build/Extensions/guisystem/UnityEngine.UI/EventSystem/ExecuteEvents.cs:269)
     UnityEngine.EventSystems.EventSystem:Update()
-* Bug where defending ships, upon being destroyed, are no longer accessible and prevent the current victorious ships from being moved 
-* Index out of bounds error when destroying ships - not sure how to reproduce
+* Index out of bounds error when destroying ships - not sure how to reproduce (?)
 
 
 
