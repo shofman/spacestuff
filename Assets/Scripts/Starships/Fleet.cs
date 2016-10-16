@@ -11,6 +11,8 @@ public class Fleet : MonoBehaviour {
     bool isMoving = false;
     List<GameObject> planets;
     GameObject newMovementTarget;
+
+    private Color allegiance;
     
     void Awake() {
         shipsInFleet = new List<GameObject>();
@@ -19,6 +21,22 @@ public class Fleet : MonoBehaviour {
 
     void Update() {
         moveShips();
+    }
+
+    /**
+     * Sets the allegiance for this particular fleet
+     * TODO - replace with Allegiances once that feature has been implemented
+     */
+    public void setFleetAllegiance(Color c) {
+        allegiance = c;
+    }
+
+    /**
+     * Returns the current allegiance of the fleet
+     * TODO - replace with Allegiances once that feature has been implemented
+     */
+    public Color getFleetAllegiance() {
+        return allegiance;
     }
 
     /**

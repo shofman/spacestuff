@@ -273,6 +273,13 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     }
 
     /**
+     * Gets the color associated with this planet
+     */
+    public Color getPlanetColor() {
+        return planetColor;
+    }
+
+    /**
      * Shifts the planet into the position provided by the x and y parameters
      * @param The distance along the x coordinate system we want the planet to move along
      * @param The distance along the y  coordinate system we want the planet to move along

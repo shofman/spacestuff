@@ -9,6 +9,7 @@ public class Ship : MonoBehaviour {
     public string shipName = "";
 
     private GameObject fleet;
+    private Color allegiance;
 
     void Awake() {
 
@@ -22,6 +23,21 @@ public class Ship : MonoBehaviour {
         if (fleet != null) {
             transform.RotateAround(fleet.transform.position, Vector3.up, 20 * Time.deltaTime);
         }
+    }
+
+    /**
+     * Sets the allegiance of this ship
+     */
+    public void setAllegiance(Color c) {
+        allegiance = c;
+        GetComponent<Renderer>().material.SetColor("_Color", c);
+    }
+
+    /**
+     * Gets the allegiance of this particular ship
+     */
+    public Color getAllegiance() {
+        return allegiance;
     }
 
     /**

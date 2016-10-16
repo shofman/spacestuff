@@ -10,13 +10,16 @@ public class PlanetProduction : MonoBehaviour {
     public GameObject shipObject;
 
     const string shipPrefix = "F3-";
-    RandomLetters shipNameGenerator;
+
+    private Planet planet;
+    private Color planetAllegiance;
 
     void Awake() {
     }
 
     void Start() {
-
+        planet = gameObject.GetComponent<Planet>();
+        planetAllegiance = planet.getPlanetColor();
     }
 
     void Update() {
@@ -29,22 +32,36 @@ public class PlanetProduction : MonoBehaviour {
      *
      */
     public void createShip() {
+        GameObject fleet = findOrCreateFleet(planet.getFleetsOverPlanet());
+        GameObject newShip = (GameObject) Instantiate (shipObject);
+        
+        // Add ship to fleet
+        Methods.addGameObjectAsChild(fleet, newShip);
+        newShip.transform.position = new Vector3(gameObject.transform.position.x + 6, gameObject.transform.position.y, gameObject.transform.position.z);
+        fleet.GetComponent<Fleet>().addShipToFleet(newShip);
+        
+        // Update ship with necessary variables
+        Ship ship = newShip.GetComponent<Ship>();
+        ship.setName(getShipName());
+        ship.setAllegiance(planetAllegiance);
+    }
+
+    private string getShipName() {
         // This needs to be initialized here to ensure each planet creates it's own random generator
-        shipNameGenerator = new RandomLetters(3);
-        List<GameObject> fleets = gameObject.GetComponent<Planet>().getFleetsOverPlanet();
-        GameObject fleet;
-        if (!fleets.Any()) {
-            fleet = (GameObject) Instantiate(fleetObject);
-            fleet.transform.position = gameObject.transform.position;
-            gameObject.GetComponent<Planet>().setFleet(fleet);
-        } else {
-            fleet = fleets[0];
-        }
-        GameObject ship = (GameObject) Instantiate (shipObject);
-        Methods.addGameObjectAsChild(fleet, ship);
-        ship.transform.position = new Vector3(gameObject.transform.position.x + 6, gameObject.transform.position.y, gameObject.transform.position.z);
+        RandomLetters shipNameGenerator = new RandomLetters(3);
         String shipName = shipNameGenerator.generateString();
-        ship.GetComponent<Ship>().setName(shipPrefix + shipName);
-        fleet.GetComponent<Fleet>().addShipToFleet(ship);
+        return shipPrefix + shipName;
+    }
+
+    private GameObject findOrCreateFleet(List<GameObject> fleets) {
+        if (!fleets.Any()) {
+            GameObject fleet = (GameObject) Instantiate(fleetObject);
+            fleet.transform.position = gameObject.transform.position;
+            fleet.GetComponent<Fleet>().setFleetAllegiance(planetAllegiance);
+            planet.setFleet(fleet);
+            return fleet;
+        } else {
+            return fleets[0];
+        }
     }
 }

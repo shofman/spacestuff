@@ -16,7 +16,7 @@ Bugs
 
 Features
 ========
-* Fleets need to specify an allegiance
+* Fleets need to specify an allegiance - currently color, replace with allegiance class
 * Ability to select which fleet you want to move when there are multiple on the planet
 * Randomly generated textures on the planets
 * Unit tests
