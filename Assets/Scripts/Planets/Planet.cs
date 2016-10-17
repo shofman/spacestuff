@@ -103,6 +103,13 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     }
 
     /**
+     * Deactivates the planet menu
+     */
+    public void deactivatePlanetMenu() {
+        canvasUI.SetActive(false);
+    }
+
+    /**
      * Activates the displays for showing the planet menu 
      * This is what will show the planet statistics, fleet information, etc
      */
@@ -393,7 +400,11 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
      * @return GameObject the fleet currently above the planet
      */
     public GameObject getFleetOverPlanet() {
-        return fleetOverPlanet[0];
+        if (fleetOverPlanet.Count > 0) {
+            return fleetOverPlanet[0];
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -437,8 +448,9 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
             // TODO - make this not always the first entry
             removeFleet(0);
             
-
-            fleet.GetComponent<Fleet>().moveFleet(planetsToMoveThrough);
+            if (fleet != null) {
+                fleet.GetComponent<Fleet>().moveFleet(planetsToMoveThrough);
+            }
         }
     }
 }

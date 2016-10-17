@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System;
 
 public class MoveFleet : MonoBehaviour {
+    public GameObject shipDisplay;
+
     /**
      * Called on each game loop
      * We use it to detect mouse clicks when moving a 
@@ -32,11 +34,12 @@ public class MoveFleet : MonoBehaviour {
     }
 
     public void moveShip() {
-        ShipDisplay display = this.gameObject.GetComponent<ShipDisplay>();
+        ShipDisplay display = shipDisplay.GetComponent<ShipDisplay>();
         if (display.areMultipleFleetsOverPlanet()) {
             display.toggleDisplayShipsOnPlanet();
             Debug.Log("Which fleet?");
         } else {
+            display.disablePlanetOverviewMenu();
             this.gameObject.GetComponent<TargetMouseTexture>().toggleTargetedMouse();  
         }
     }

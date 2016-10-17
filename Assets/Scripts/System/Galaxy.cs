@@ -16,6 +16,9 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     public int planetRows;
     public int planetColumns;
 
+    // The launcher for transportation between galaxies
+    public GameObject launcher;
+
     //Name of the object that houses the trade routes for this galaxy
     public const string TRADE_ROUTE_HOLDER = "TradeRouterHolder"; 
 
@@ -100,13 +103,23 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
 
         int totalBluePlanets = planetRows*planetColumns/2;
         int totalRedPlanets = totalBluePlanets;
+
+        bool hasCreatedLauncher = false;
         
         for (int i=0; i<planetRows*planetColumns; i++) {
             GameObject planetCreated = (GameObject)Instantiate(planet);
-            planetCreated.transform.parent = planetsHolder.transform;
+            planetCreated.transform.SetParent(planetsHolder.transform);
+
+            int shouldCreatelauncher = random.Next(0,100);
+            if ((shouldCreatelauncher > 90 || i == (planetRows*planetColumns)-1) && !hasCreatedLauncher) {
+                hasCreatedLauncher = true;
+                GameObject newLauncher = (GameObject) Instantiate(launcher);
+                newLauncher.transform.SetParent(planetCreated.transform);
+                Debug.Log(planetNames[i]);
+            }
+
             int xPos = ((i/planetRows)*20)-20 + (int) gameObject.transform.position.x;
             int yPos = ((i%planetRows)*20)-20 + (int) gameObject.transform.position.y;
-
             Planet newPlanet = planetCreated.GetComponent<Planet>();
             newPlanet.setPosition(xPos, yPos);
             newPlanet.setGalaxy(this.gameObject);

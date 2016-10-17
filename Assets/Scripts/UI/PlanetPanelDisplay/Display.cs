@@ -7,6 +7,7 @@ using System.Collections.Generic;
  * Generic class holding the logic shared between display panels on the planet menu
  */
 public class Display : MonoBehaviour, ITabDisplayInterface {
+    public GameObject planetPanel;
     /**
      * The planet we are currently viewing
      */
@@ -44,5 +45,16 @@ public class Display : MonoBehaviour, ITabDisplayInterface {
      */
     public void disableDisplay() {
         gameObject.SetActive(false);
+    }
+
+    /**
+     * Disables the display for the planet
+     */
+    public void disablePlanetOverviewMenu() {
+        planetPanel.GetComponent<TabManager>().setOpen(false);
+        GameObject planet = getPlanet();
+        if (planet != null) {
+            planet.GetComponent<Planet>().deactivatePlanetMenu();
+        }
     }
 }
