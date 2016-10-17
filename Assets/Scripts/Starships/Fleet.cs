@@ -57,11 +57,14 @@ public class Fleet : MonoBehaviour {
     /**
      * Lists off all the ships in this fleet by name
      */
-    public void listShipsInFleet() {
+    public List<GameObject> listShipsInFleet() {
+        List<GameObject> ships = new List<GameObject>();
         foreach (GameObject ship in shipsInFleet) {
             string name = ship.GetComponent<Ship>().getName();
             Debug.Log(name);
+            ships.Add(ship);
         }
+        return ships;
     }
 
     /**

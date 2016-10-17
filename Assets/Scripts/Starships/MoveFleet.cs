@@ -32,7 +32,13 @@ public class MoveFleet : MonoBehaviour {
     }
 
     public void moveShip() {
-        this.gameObject.GetComponent<TargetMouseTexture>().toggleTargetedMouse();
+        ShipDisplay display = this.gameObject.GetComponent<ShipDisplay>();
+        if (display.areMultipleFleetsOverPlanet()) {
+            display.toggleDisplayShipsOnPlanet();
+            Debug.Log("Which fleet?");
+        } else {
+            this.gameObject.GetComponent<TargetMouseTexture>().toggleTargetedMouse();  
+        }
     }
 
     /**

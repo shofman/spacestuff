@@ -11,7 +11,20 @@ Bugs
     UnityEngine.EventSystems.ExecuteEvents.Execute[IPointerClickHandler] (UnityEngine.GameObject target, UnityEngine.EventSystems.BaseEventData eventData, UnityEngine.EventSystems.EventFunction`1 functor) (at C:/buildslave/unity/build/Extensions/guisystem/UnityEngine.UI/EventSystem/ExecuteEvents.cs:269)
     UnityEngine.EventSystems.EventSystem:Update()
 * Index out of bounds error when destroying ships - not sure how to reproduce (?)
-
+    - May be related Argument Out of range: ArgumentOutOfRangeException: Argument is out of range.
+        Parameter name: index
+        System.Collections.Generic.List`1[UnityEngine.GameObject].get_Item (Int32 index) (at /Users/builduser/buildslave/mono/build/mcs/class/corlib/System.Collections.Generic/List.cs:633)
+        Planet.getFleetOverPlanet () (at Assets/Scripts/Planets/Planet.cs:396)
+        Planet.moveFleet (UnityEngine.GameObject planetToMoveTo) (at Assets/Scripts/Planets/Planet.cs:434)
+        Planet.OnPointerClick (UnityEngine.EventSystems.PointerEventData eventData) (at Assets/Scripts/Planets/Planet.cs:98)
+        UnityEngine.EventSystems.ExecuteEvents.Execute (IPointerClickHandler handler, UnityEngine.EventSystems.BaseEventData eventData) (at C:/buildslave/unity/build/Extensions/guisystem/UnityEngine.UI/EventSystem/ExecuteEvents.cs:52)
+        UnityEngine.EventSystems.ExecuteEvents.Execute[IPointerClickHandler] (UnityEngine.GameObject target, UnityEngine.EventSystems.BaseEventData eventData, UnityEngine.EventSystems.EventFunction`1 functor) (at C:/buildslave/unity/build/Extensions/guisystem/UnityEngine.UI/EventSystem/ExecuteEvents.cs:269)
+        UnityEngine.EventSystems.EventSystem:Update()
+    This one was a result of leaving and coming back. Only two planets were unselectable and threw error. All move ship buttons are broken
+* When switching between views, ensure that ship display is toggled off. Two ways to break
+    - Select planet with ships. Toggle display on. Switch to planet without ships. Display still visible, and untogglable off.
+    - Select planet with ships. Toggle display on. Go to move ships. Display still visible.
+* When there is a large amount of entries in a scroll list, clicking down to drag triggers the movement of the camera
 
 
 
@@ -22,9 +35,14 @@ Features
 * Figure out how to deal with slower ships
 * Figure out how to deal with situation where two fleets are travelling together - need method of combining them together
 * Ability to select which fleet you want to move when there are multiple on the planet
-* Randomly generated textures on the planets
+* Randomly generated textures on the planets - add different biomes
+* Different biomes need to have differing results on the planets
 * Unit tests
 * Battles between differing allegiances
 * Movements between galaxies
+* Move galaxies at random
+* Untangle trade routes and move into random pattern
+* Limit camera view to only what is available (or wrap around)
 * Refactor fleets within planets code away into separate class
 * Prevent ships from being created when occupied by foreign ship (or immediately engage in combat?)
+* Add ownership concept - players not on the same team cannot move the ships that do not belong to them. 
