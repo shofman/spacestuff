@@ -30,11 +30,13 @@ Features
 * Unit tests
 * Battles between differing allegiances
 * Movements between galaxies
-    - Should have multiple entry points for how close they are to relative galaxies
+    - Should have multiple entry points for how close they are to relative galaxies ?
+    - Add a random component for the amount of entry points between them
 * Move galaxies at random
 * Untangle trade routes and move into random pattern
+* Need to be able to move fleets to other galaxies (scroll to side of screen for movement ?)
 * Limit camera view to only what is available (or wrap around)
-* Refactor fleets within planets code away into separate class
+* Refactor fleets within planets code away into separate class - too available, too many public methods
 * Prevent ships from being created when occupied by foreign ship (or immediately engage in combat?)
 * Add ownership concept - players not on the same team cannot move the ships that do not belong to them. 
 * Address TODO within codebase

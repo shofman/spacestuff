@@ -17,7 +17,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     public int planetColumns;
 
     // The launcher for transportation between galaxies
-    public GameObject launcher;
+    public GameObject launcherObject;
 
     //Name of the object that houses the trade routes for this galaxy
     public const string TRADE_ROUTE_HOLDER = "TradeRouterHolder"; 
@@ -50,6 +50,9 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     //Initial position in global array holding position
     int universePositionX = -1;
     int universePositionY = -1;
+
+    //List of Launchers (transports between galaxies) in this galaxy
+    private List<GameObject> launchersList;
     
     /**
      * On intialization, create necessary child gameObject, setup random generator, and initialize required variables
@@ -59,6 +62,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
         tradeRouteHolder = createEmptyGameObject(TRADE_ROUTE_HOLDER);
         random = new System.Random();
         connectedGalaxies = new List<GameObject>();
+        launchersList = new List<GameObject>();
     }
 
     /**
@@ -110,14 +114,6 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
             GameObject planetCreated = (GameObject)Instantiate(planet);
             planetCreated.transform.SetParent(planetsHolder.transform);
 
-            int shouldCreatelauncher = random.Next(0,100);
-            if ((shouldCreatelauncher > 90 || i == (planetRows*planetColumns)-1) && !hasCreatedLauncher) {
-                hasCreatedLauncher = true;
-                GameObject newLauncher = (GameObject) Instantiate(launcher);
-                newLauncher.transform.SetParent(planetCreated.transform);
-                Debug.Log(planetNames[i]);
-            }
-
             int xPos = ((i/planetRows)*20)-20 + (int) gameObject.transform.position.x;
             int yPos = ((i%planetRows)*20)-20 + (int) gameObject.transform.position.y;
             Planet newPlanet = planetCreated.GetComponent<Planet>();
@@ -126,6 +122,20 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
             newPlanet.setName(planetNames[i]);
             newPlanet.setIndex(i/planetRows, i%planetRows);
             listOfPlanets[i/planetRows,i%planetRows] = planetCreated;
+
+            int shouldCreatelauncher = random.Next(0,100);
+            if ((shouldCreatelauncher > 85 || i == (planetRows*planetColumns)-1) && !hasCreatedLauncher) {
+                hasCreatedLauncher = true;
+                GameObject newLauncher = (GameObject) Instantiate(launcherObject);
+                newLauncher.transform.SetParent(planetCreated.transform);
+                newLauncher.transform.position = planetCreated.transform.position;
+                newLauncher.transform.position += new Vector3(4,4,0);
+                newLauncher.transform.eulerAngles = new Vector3(0,0,320);
+
+                newPlanet.setLauncher(true);
+                launchersList.Add(planetCreated);
+                Debug.Log(planetNames[i]);
+            }
 
             if (totalBluePlanets > 0 && totalRedPlanets > 0) {
                 int randomValue = random.Next(0,100);
@@ -373,6 +383,13 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
      */
     public List<GameObject> getConnectedObjects() {
         return this.connectedGalaxies;
+    }
+
+    /**
+     * Returns the list of launchers this galaxy has
+     */
+    public List<GameObject> getLaunchers() {
+        return launchersList;
     }
 
     /** 

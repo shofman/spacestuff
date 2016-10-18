@@ -16,6 +16,7 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     int garrisons;
     bool isRemoved = false;
     bool hasVisited = false;
+    bool hasLauncher = false;
     GameObject priorGameObject;
     bool createdNameObject = false;
     string planetName;
@@ -107,6 +108,13 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
      */
     public void deactivatePlanetMenu() {
         canvasUI.SetActive(false);
+    }
+
+    /**
+     * Sets whether this planet has a launcher to another galaxy
+     */
+    public void setLauncher(bool hasLauncher) {
+        this.hasLauncher = hasLauncher;
     }
 
     /**
@@ -422,6 +430,13 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     }
 
     /**
+     * Returns the galaxy that this planet belongs to
+     */
+    public GameObject getGalaxy() {
+        return this.galaxy;
+    }
+
+    /**
      * Sets the prior planet visited (for bfs distances)
      */
     public void setPrior(GameObject prior) {
@@ -443,14 +458,58 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     public void moveFleet(GameObject planetToMoveTo) {
         if (planetToMoveTo.GetInstanceID() != this.gameObject.GetInstanceID()) {
             GameObject fleet = getFleetOverPlanet();
-            GameObject[] planetsToMoveThrough = galaxy.GetComponent<Galaxy>().bfsGalaxy(this.gameObject, planetToMoveTo);
+            GameObject[] planetsToMoveThrough = null;
+            if (isPlanetInSameGalaxy(planetToMoveTo)) {
+                planetsToMoveThrough = galaxy.GetComponent<Galaxy>().bfsGalaxy(this.gameObject, planetToMoveTo);
+            } else {
+                planetsToMoveThrough = multiGalaxyMoveFleet(planetToMoveTo);
+            }
             
             // TODO - make this not always the first entry
             removeFleet(0);
             
-            if (fleet != null) {
+            if (fleet != null && planetsToMoveThrough != null) {
                 fleet.GetComponent<Fleet>().moveFleet(planetsToMoveThrough);
             }
         }
+    }
+
+    /**
+     * Since the planet belongs to another galaxy, we move the ships to the launcher for the current galaxy
+     * We then do a universe bfs search for the fastest route to the galaxy we want to go towards from our current galaxy
+     * Then we do another galaxy bfs from that launcher to the target planet
+     */
+    private GameObject[] multiGalaxyMoveFleet(GameObject planetToMoveTo) {
+        GameObject[] planetsToMoveThrough = null;
+        Galaxy currentGalaxy = galaxy.GetComponent<Galaxy>();
+        // TODO - make the launchers a dynamic option (bfs each, and see whichever list is shorter)
+        GameObject closestCurrentLauncher = currentGalaxy.getLaunchers()[0];
+
+        // Move the fleet to the launcher - initialized to empty in the case where the launcher and starting planet are the same (returns null)
+        GameObject[] currentGalaxyMovementList = new GameObject[0];
+        if (this.gameObject.GetInstanceID() != closestCurrentLauncher.GetInstanceID()) {
+            currentGalaxyMovementList = currentGalaxy.bfsGalaxy(this.gameObject, currentGalaxy.getLaunchers()[0]);
+        }
+
+        // Get the list of movements between the target galaxy launcher and destination planet
+        Galaxy targetGalaxy = planetToMoveTo.GetComponent<Planet>().getGalaxy().GetComponent<Galaxy>();
+
+        GameObject closestTargetLauncher = targetGalaxy.getLaunchers()[0];
+
+        GameObject[] targetGalaxyMovementList = new GameObject[0];
+        if (closestTargetLauncher.GetInstanceID() != planetToMoveTo.GetInstanceID()) {
+            targetGalaxyMovementList = targetGalaxy.bfsGalaxy(closestTargetLauncher, planetToMoveTo);
+        }
+        
+        // Combine the values
+        // Because the implementation of the bfs assumes that the ship is on the starting node,
+        // we need to add the target galaxy launcher planet to our list of movements
+        GameObject[] targetLauncher = new GameObject[] { closestTargetLauncher };
+        GameObject[] fullMovement = currentGalaxyMovementList.Concat(targetLauncher).Concat(targetGalaxyMovementList).ToArray();
+        return fullMovement;
+    }
+
+    private bool isPlanetInSameGalaxy(GameObject otherPlanet) {
+        return this.getGalaxy().GetInstanceID() == otherPlanet.GetComponent<Planet>().getGalaxy().GetInstanceID();
     }
 }
