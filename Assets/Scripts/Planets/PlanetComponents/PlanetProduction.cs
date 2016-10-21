@@ -19,7 +19,7 @@ public class PlanetProduction : MonoBehaviour {
 
     void Start() {
         planet = gameObject.GetComponent<Planet>();
-        planetAllegiance = planet.getPlanetColor();
+        planetAllegiance = planet.getAllegiance();
     }
 
     void Update() {

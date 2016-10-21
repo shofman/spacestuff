@@ -3,11 +3,12 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-public class TurnDisplay : MonoBehaviour {
+public class TurnDisplay : MonoBehaviour, Observer {
 	Text txt;
 	int turnCount = 0;
 
 	void Awake() {
+		EndTurnNotifier.instance().addObserver(this);
 		txt = gameObject.GetComponent<Text>();
 		updateCount();
 	}
@@ -25,8 +26,15 @@ public class TurnDisplay : MonoBehaviour {
 	/**
 	 * Increments the turn count 
 	 */
-	public void updateCount() {
+	private void updateCount() {
 		turnCount++;
 		txt.text = "Turn: " + turnCount;
+	}
+
+	/**
+	 * Implemented as part of Observer, is called when end of turn happens
+	 */
+	public void onNotify() {
+	    updateCount();
 	}
 }

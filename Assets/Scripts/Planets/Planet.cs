@@ -64,13 +64,13 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
         listOfRoutes = new List<GameObject>();
         random = new System.Random ();
         fleetOverPlanet = new List<GameObject>();
+        spice = random.Next (0, 100);
+        defense = random.Next (0, 100);
+        hasVisited = false;
     }
 
     // Use this for initialization
     void Start () {
-        spice = random.Next (0, 100);
-        defense = random.Next (0, 100);
-        hasVisited = false;
     }
     
     // Update is called once per frame
@@ -277,20 +277,9 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     }
 
     /**
-     * Sets the planets color
-     * @param Color - the color we want to set the planet to
-     */
-    public void setToColor(Color c) {
-        planetColor = c;
-        if (nameDisplay != null) {
-            nameDisplay.GetComponent<TextMesh>().color = planetColor;
-        }
-    }
-
-    /**
      * Gets the color associated with this planet
      */
-    public Color getPlanetColor() {
+    public Color getAllegiance() {
         return planetColor;
     }
 
@@ -457,6 +446,20 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     }
 
     /**
+     * Returns the spice amount on this planet (used for calculating resource total)
+     */
+    public int getSpiceValue() {
+        return spice;
+    }
+
+    /**
+     * Returns the defense value of this planet
+     */
+    public int getDefenseValue() {
+        return defense;
+    }
+
+    /**
      * Transfers the fleet to the planet provided
      * @param  GameObject planetToMoveTo - The planet we want to move to 
      * Currently, only moves the first entry on the fleet list
@@ -515,7 +518,21 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
         return fullMovement;
     }
 
+    /**
+     * Returns whether this planet is in the same galaxy as the planet parameter
+     */
     private bool isPlanetInSameGalaxy(GameObject otherPlanet) {
         return this.getGalaxy().GetInstanceID() == otherPlanet.GetComponent<Planet>().getGalaxy().GetInstanceID();
+    }
+
+    /**
+     * Sets the planets color
+     * @param Color - the color we want to set the planet to
+     */
+    private void setToColor(Color c) {
+        planetColor = c;
+        if (nameDisplay != null) {
+            nameDisplay.GetComponent<TextMesh>().color = planetColor;
+        }
     }
 }

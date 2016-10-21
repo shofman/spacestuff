@@ -134,7 +134,6 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
 
                 newPlanet.setLauncher(true);
                 launchersList.Add(planetCreated);
-                Debug.Log(planetNames[i]);
             }
 
             if (totalBluePlanets > 0 && totalRedPlanets > 0) {
@@ -291,24 +290,10 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
         Planet addedPlanetScript = addedPlanet.GetComponent<Planet>();
         addedPlanetScript.addTradeRoute(planetToAdd);
     }
-
-    /**
-     * Display the planet names within a galaxy
-     * @param  The list of planets we want to display
-     */
-    void displayPlanetList(List<GameObject> listToDisplay) {
-        foreach (GameObject g in listToDisplay) {
-            Debug.Log(g.GetComponent<Planet>().getName());
-        }
-    }
     
     // Update is called once per frame
     void Update () {
-        if(Input.GetKeyDown("a")) {
-            gameObject.GetComponent<BreadthFirstSearch>().breadthFirstSearchPlanets<Planet>(listOfPlanets[2,2], listOfPlanets, true);
-        } else if (Input.GetKeyDown("c")) {
-            listOfPlanets[0,0].GetComponent<PlanetProduction>().createShip();
-        }
+
     }
 
     /**
@@ -425,6 +410,19 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
      */
     public List<GameObject> getLaunchers() {
         return launchersList;
+    }
+
+    /**
+     * Returns a list of all the planets within this galaxy
+     */
+    public List<GameObject> getListOfPlanets() {
+        List<GameObject> planetList = new List<GameObject>();
+        for (int i=0; i<listOfPlanets.GetLength(0); i++) {
+            for (int j=0; j<listOfPlanets.GetLength(1); j++) {
+                planetList.Add(listOfPlanets[i,j]);
+            }
+        }
+        return planetList;
     }
 
     /** 
