@@ -7,6 +7,7 @@ public class Ship : MonoBehaviour {
     public int health = 10;
     public int shields = 1;
     public int attack = 1;
+    public int distance = 3;
     public string shipName = "";
 
     private GameObject fleet;
@@ -68,5 +69,12 @@ public class Ship : MonoBehaviour {
      */
     public int getAttack() {
         return attack;
+    }
+
+    /**
+     * Returns the distance of the ship
+     */
+    public int getDistance() {
+        return distance;
     }
 }

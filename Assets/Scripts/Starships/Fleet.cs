@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 
-public class Fleet : MonoBehaviour {
+public class Fleet : MonoBehaviour, Observer {
     public int speed = 8;
     List<GameObject> shipsInFleet;
 
@@ -15,8 +15,12 @@ public class Fleet : MonoBehaviour {
     GameObject orbitingPlanet;
 
     private Color allegiance;
+
+    // This should be reduced after adding ships - TODO make private
+    private int travelRemaining = 100;
     
     void Awake() {
+        EndTurnNotifier.instance().addObserver(this);
         shipsInFleet = new List<GameObject>();
         planets = new List<GameObject>();
         orbitingPlanet = null;
@@ -52,6 +56,12 @@ public class Fleet : MonoBehaviour {
     public void addShipToFleet(GameObject ship) {
         shipsInFleet.Add(ship);
         ship.GetComponent<Ship>().attachToFleet(this.gameObject);
+        
+        // If the new ship is slower than the remaining distance, we slow the rest of the fleet down
+        int slowestShip = getSlowestShipDistance();
+        if (travelRemaining > slowestShip) {
+            travelRemaining = slowestShip;
+        }
     }
 
     /**
@@ -123,7 +133,7 @@ public class Fleet : MonoBehaviour {
      * and continue
      */
     private void moveShips() {
-        if (isMoving) {
+        if (isMoving && travelRemaining > 0) {
             Vector3 position = newMovementTarget.transform.position;
             if (gameObject.transform.position != position) {
                 float step = speed * Time.deltaTime;
@@ -146,6 +156,7 @@ public class Fleet : MonoBehaviour {
      * Otherwise, continue moving
      */
     private void continueMovingOrStop() {
+        travelRemaining--;
         if (planets.Count > 0) {
             newMovementTarget = popNextDestination();
         } else {
@@ -199,5 +210,33 @@ public class Fleet : MonoBehaviour {
         GameObject removal = planets[0];
         planets.RemoveAt(0);
         return removal;
+    }
+
+    /**
+     * Finds the lowest distance of the ships within this fleet
+     */
+    private int getSlowestShipDistance() {
+        int lowest = 1000;
+        foreach (GameObject ship in shipsInFleet) {
+            int shipMovementLimit = ship.GetComponent<Ship>().getDistance();
+            if (shipMovementLimit < lowest) {
+                lowest = shipMovementLimit;
+            }
+        }
+        return lowest;
+    }
+
+    /**
+     * Resets the travel remaining after an end of turn
+     */
+    private void resetTravel() {
+        travelRemaining = getSlowestShipDistance();
+    }
+
+    /**
+     * Implemented as part of Observer, is called when end of turn happens
+     */
+    public void onNotify() {
+        resetTravel();
     }
 }
