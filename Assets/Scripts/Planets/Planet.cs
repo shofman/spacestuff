@@ -236,7 +236,6 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
             LineRenderer line = lineRenderer.GetComponent<LineRenderer>();
             line.SetColors(c,c);
         }
-        
     }
 
     /**
@@ -448,6 +447,13 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
      */
     public GameObject getPrior() {
         return priorGameObject;
+    }
+
+    /**
+     * Retrieves the trade routes for a particular planet
+     */
+    public List<GameObject> getTradeRoutes() {
+        return listOfRoutes;
     }
 
     /**

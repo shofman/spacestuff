@@ -14,6 +14,8 @@ Bugs
 * When switching between views, ensure that ship display is toggled off. Two ways to break
     - Select planet with ships. Toggle display on. Switch to planet without ships. Display still visible, and untogglable off.
 * When there is a large amount of entries in a scroll list, clicking down to drag triggers the movement of the camera
+* Cycle was possible within galaxy - formed triangle with three planets
+* When the number of planets is too great, the name generator fails (since it doesn't take into account the number of planets needed)
 
 
 

@@ -163,6 +163,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
                 removeEdgelessPlanets(listOfPlanets[i,j]);
             }
         }
+        // randomlyMoveFromCenter();
         displayConnectedPlanets();
     }
 
@@ -344,6 +345,40 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     }
 
     /**
+     * Finds where in this galaxy that the trade routes are crossing
+     */
+    public List<PlanetLine> findCrossingEdges() {
+        // Get all the current trade routes
+        List<PlanetLine> allTradeRoutes = new List<PlanetLine>();
+        for (int i=0; i<planetRows; i++) {
+            for (int j=0; j<planetColumns; j++) {
+                GameObject currentPlanet = listOfPlanets[j,i];
+                List<GameObject> connectedPlanets = new List<GameObject>(currentPlanet.GetComponent<Planet>().getConnectedObjects());
+                foreach (GameObject planet in connectedPlanets) {
+                    allTradeRoutes.Add(new PlanetLine(currentPlanet, planet));
+                }
+            }
+        }
+        bool foundIntersection = false;
+
+        List<PlanetLine> intersectionLines = new List<PlanetLine>();
+        foreach (PlanetLine firstLine in allTradeRoutes) {
+            foreach (PlanetLine secondLine in allTradeRoutes) {
+                if (!firstLine.containsSamePoint(secondLine) && !intersectionAlreadyFound(firstLine, secondLine, intersectionLines)) {
+                    bool otherIntersection = lineIntersects(firstLine.planetOne, firstLine.planetTwo, secondLine.planetOne, secondLine.planetTwo);
+                    if (otherIntersection) {
+                        foundIntersection = true;
+                        intersectionLines.Add(firstLine);
+                        intersectionLines.Add(secondLine);
+                        Debug.Log(firstLine.firstPlanet.GetComponent<Planet>().getName() + " " + firstLine.secondPlanet.GetComponent<Planet>().getName() + " " + secondLine.firstPlanet.GetComponent<Planet>().getName() + " " + secondLine.secondPlanet.GetComponent<Planet>().getName());
+                    }
+                }
+            }
+        }
+        return intersectionLines;
+    }
+
+    /**
      * Sets the indices within the parent array (in this case, universe) for easy access during search
      * @param int xPos - The first parameter in the two dimensional array this value is stored within in the parent array
      * @param int yPos - The second parameter in the two dimensional array this value is stored within in the parent array
@@ -404,4 +439,180 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
         return gameObject.GetComponent<BreadthFirstSearch>().breadthFirstSearchPath<Planet>(listOfPlanets, startNode, targetNode);
     }
 
+    public class PlanetLine : IEquatable<PlanetLine>{
+        public GameObject firstPlanet;
+        public GameObject secondPlanet;
+        public Vector3 planetOne;
+        public Vector3 planetTwo;
+        public PlanetLine(GameObject firstPlanet, GameObject secondPlanet) {
+            this.firstPlanet = firstPlanet;
+            this.secondPlanet = secondPlanet;
+            this.planetOne = firstPlanet.transform.position;
+            this.planetTwo = secondPlanet.transform.position;
+        }
+
+        public bool Equals( PlanetLine other ) {
+            if (other != null ) {
+                return (this.firstPlanet.GetInstanceID() == other.firstPlanet.GetInstanceID() &&
+                        this.secondPlanet.GetInstanceID() == other.secondPlanet.GetInstanceID()) ||
+                        (this.firstPlanet.GetInstanceID() == other.secondPlanet.GetInstanceID() && 
+                         this.secondPlanet.GetInstanceID() == other.firstPlanet.GetInstanceID());
+            }
+            return false;
+        }
+
+        public bool containsSamePoint(PlanetLine otherLine) {
+            return this.planetOne == otherLine.planetTwo || 
+                   this.planetTwo == otherLine.planetOne ||
+                   this.planetOne == otherLine.planetOne ||
+                   this.planetTwo == otherLine.planetTwo;
+        }
+    }
+
+    private void randomlyMoveFromCenter() {
+        List<GameObject> bottomLeftPlanets = new List<GameObject>();
+        List<GameObject> topLeftPlanets = new List<GameObject>();
+        List<GameObject> bottomRightPlanets = new List<GameObject>();
+        List<GameObject> topRightPlanets = new List<GameObject>();
+        float bottomLeftAverageX = 0;
+        float bottomLeftAverageY = 0;
+        float bottomRightAverageX = 0;
+        float bottomRightAverageY = 0;
+        float topLeftAverageX = 0;
+        float topLeftAverageY = 0;
+        float topRightAverageX = 0;
+        float topRightAverageY = 0;
+
+        int totalCount = 0;
+        for (int i=0; i<planetRows; i++) {
+            for (int j=0; j<planetColumns; j++) {
+                totalCount++;
+                GameObject currentPlanet = listOfPlanets[j,i];
+                Vector3 currentPosition = currentPlanet.transform.position;
+                int randomX = random.Next(0,30);
+                int randomY = random.Next(0,30);
+                if (isInBottomLeftQuadrant(i, j)) {
+                    currentPlanet.transform.position = new Vector3(currentPosition.x - randomX, currentPosition.y - randomY, currentPosition.z);
+                    bottomLeftAverageX += currentPlanet.transform.position.x;
+                    bottomLeftAverageY += currentPlanet.transform.position.y;
+                    bottomLeftPlanets.Add(currentPlanet);
+                }
+                randomX = random.Next(0,30);
+                randomY = random.Next(0,30);
+                if (isInBottomRightQuadrant(i,j)) {
+                    currentPlanet.transform.position = new Vector3(currentPosition.x + randomX, currentPosition.y - randomY, currentPosition.z);
+                    bottomRightPlanets.Add(currentPlanet);
+                    bottomRightAverageX += currentPlanet.transform.position.x;
+                    bottomRightAverageY += currentPlanet.transform.position.y;
+                }
+                randomX = random.Next(0,30);
+                randomY = random.Next(0,30);
+                if (isInTopRightQuadrant(i,j)) {
+                    currentPlanet.transform.position = new Vector3(currentPosition.x + randomX, currentPosition.y + randomY, currentPosition.z);
+                    topRightPlanets.Add(currentPlanet);
+                    topRightAverageX += currentPlanet.transform.position.x;
+                    topRightAverageY += currentPlanet.transform.position.y;
+                }
+                randomX = random.Next(0,30);
+                randomY = random.Next(0,30);
+                if (isInTopLeftQuadrant(i,j)) {
+                    currentPlanet.transform.position = new Vector3(currentPosition.x - randomX, currentPosition.y + randomY, currentPosition.z);
+                    topLeftPlanets.Add(currentPlanet);
+                    topLeftAverageX += currentPlanet.transform.position.x;
+                    topLeftAverageY += currentPlanet.transform.position.y;
+                }
+            }
+        }
+
+        bottomLeftAverageX /= bottomLeftPlanets.Count;
+        bottomLeftAverageY /= bottomLeftPlanets.Count;
+        bottomRightAverageX /= bottomRightPlanets.Count;
+        bottomRightAverageY /= bottomRightPlanets.Count;
+        topLeftAverageX /= topLeftPlanets.Count;
+        topLeftAverageY /= topLeftPlanets.Count;
+        topRightAverageX /= topRightPlanets.Count;
+        topRightAverageY /= topRightPlanets.Count;
+
+        // GameObject bottomLeftPlanetAverage = (GameObject)Instantiate(planet);
+        // bottomLeftPlanetAverage.transform.position = new Vector3(bottomLeftAverageX, bottomLeftAverageY, 0);
+        // bottomLeftPlanetAverage.name = "BTM LEFT AVG";
+
+        // GameObject topLeftPlanetAverage = (GameObject)Instantiate(planet);
+        // topLeftPlanetAverage.transform.position = new Vector3(topLeftAverageX, topLeftAverageY, 0);
+        // topLeftPlanetAverage.name = "TOP LEFT AVG";
+
+        // GameObject topRightPlanetAverage = (GameObject)Instantiate(planet);
+        // topRightPlanetAverage.transform.position = new Vector3(topRightAverageX, topRightAverageY, 0);
+        // topRightPlanetAverage.name = "TOP RIGHT AVG";
+
+        // GameObject bottomRightPlanetAverage = (GameObject)Instantiate(planet);
+        // bottomRightPlanetAverage.transform.position = new Vector3(bottomRightAverageX, bottomRightAverageY, 0);
+        // bottomRightPlanetAverage.name = "BTM RIGHT AVG";
+        
+
+    }
+
+    private Vector3 calcAveragePosition(List<GameObject> planets) {
+        float averageX = 0;
+        float averageY = 0;
+
+        foreach (GameObject planet in planets) {
+            averageX += planet.transform.position.x;
+            averageY += planet.transform.position.y;
+        }
+        averageX /= planets.Count;
+        averageY /= planets.Count;
+        return new Vector3(averageX, averageY, 0);
+    }
+
+    private bool isInBottomLeftQuadrant(int rowPos, int columnPos) {
+        return (rowPos <= (planetRows-1)/2) && (columnPos <= (planetColumns-1)/2);
+    }
+
+    private bool isInBottomRightQuadrant(int rowPos, int columnPos) {
+        if (planetColumns % 2 == 1) {
+            return (rowPos <= (planetRows-1)/2) && (columnPos >= (planetColumns-1)/2);
+        } else {
+            return (rowPos <= (planetRows-1)/2) && (columnPos > (planetColumns-1)/2);        
+        }
+    }
+
+    private bool isInTopRightQuadrant(int rowPos, int columnPos) {
+        bool isInRow = (planetRows % 2 == 1) ? (rowPos >= (planetRows-1)/2) : (rowPos > (planetRows-1)/2);
+        bool isInColumn  = (planetColumns % 2 == 1) ? (columnPos >= (planetColumns-1)/2) : (columnPos > (planetColumns-1)/2);
+        return isInRow && isInColumn;
+    }
+
+    private bool isInTopLeftQuadrant(int rowPos, int columnPos) {
+        if (planetRows % 2 == 1) {
+            return (rowPos >= (planetRows-1)/2) && (columnPos <= (planetColumns-1)/2);
+        } else {
+            return (rowPos > (planetRows-1)/2) && (columnPos <= (planetColumns-1)/2);
+        }
+    }
+
+    /**
+     * Returns whether or not the intersection has already been identified (since each trade route is two-way, there are duplicates)
+     */
+    private bool intersectionAlreadyFound(PlanetLine firstLine, PlanetLine secondLine, List<PlanetLine> intersectionsList) {
+        return (intersectionsList.Contains(firstLine) && intersectionsList.Contains(secondLine));
+    }
+
+    /**
+     * Determines whether a line intersects another based off the anchor points
+     */
+    private bool lineIntersects(Vector3 pointOne, Vector3 pointTwo, Vector3 pointThree, Vector3 pointFour) {
+
+        float lineOneXSlope, lineOneYSlope, lineTwoXSlope, lineTwoYSlope;
+        lineOneXSlope = pointTwo.x - pointOne.x;
+        lineOneYSlope = pointTwo.y - pointOne.y;
+        lineTwoXSlope = pointFour.x - pointThree.x;
+        lineTwoYSlope = pointFour.y - pointThree.y;
+
+        float s, t;
+        s = (-lineOneYSlope * (pointOne.x - pointThree.x) + lineOneXSlope * (pointOne.y - pointThree.y)) / (-lineTwoXSlope * lineOneYSlope + lineOneXSlope * lineTwoYSlope);
+        t = ( lineTwoXSlope * (pointOne.y - pointThree.y) - lineTwoYSlope * (pointOne.x - pointThree.x)) / (-lineTwoXSlope * lineOneYSlope + lineOneXSlope * lineTwoYSlope);
+
+        return (s >= 0 && s <= 1 && t >= 0 && t <= 1);
+    }
 }

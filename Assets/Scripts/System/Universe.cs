@@ -49,7 +49,7 @@ public class Universe : MonoBehaviour {
 
         for (int i=0; i<listOfGalaxies.GetLength(0); i++) {
             GameObject galaxyCreated = (GameObject)Instantiate(galaxy);
-            galaxyCreated.transform.Translate(i*120, 0, 0);
+            galaxyCreated.transform.Translate(i*220, 0, 0);
             Galaxy galaxyScript = galaxyCreated.GetComponent<Galaxy>();
 
             // Each planet needs a name, plus the galaxy should be named
@@ -86,7 +86,7 @@ public class Universe : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         if(Input.GetKeyDown("b")) {
-            gameObject.GetComponent<BreadthFirstSearch>().breadthFirstSearchPlanets<Galaxy>(listOfGalaxies[2,0], listOfGalaxies, true);
+            listOfGalaxies[0,0].GetComponent<Galaxy>().findCrossingEdges();
         }
     }
 }
