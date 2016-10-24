@@ -16,7 +16,6 @@ public class Fleet : MonoBehaviour, Observer {
 
     private Color allegiance;
 
-    // This should be reduced after adding ships - TODO make private
     private int travelRemaining = 100;
     
     void Awake() {
@@ -115,6 +114,9 @@ public class Fleet : MonoBehaviour, Observer {
         Destroy(gameObject);
     }
 
+    /**
+     * Lands the ship on the new movement target
+     */
     public void landOnPlanet() {
         orbitPlanet(newMovementTarget);
         newMovementTarget.GetComponent<Planet>().setFleet(this.gameObject);
@@ -142,6 +144,8 @@ public class Fleet : MonoBehaviour, Observer {
                 if (isEnemyFleetAtPlanet()) {
                     isMoving = false;
                     List<GameObject> possibleFleets = getVisitingPlanetFleets();
+
+                    // TODO - Address that we might be attacking multiple fleets
                     engageEnemy(possibleFleets[0]);
                 } else {
                     continueMovingOrStop();

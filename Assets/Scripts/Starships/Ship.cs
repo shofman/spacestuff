@@ -10,8 +10,8 @@ public class Ship : MonoBehaviour {
     public int distance = 3;
     public string shipName = "";
 
-    private GameObject fleet;
-    private Color allegiance;
+    protected GameObject fleet;
+    protected Color allegiance;
 
     void Awake() {
 
@@ -21,7 +21,7 @@ public class Ship : MonoBehaviour {
 
     }
 
-    void Update() {
+    protected virtual void Update() {
         if (fleet != null) {
             transform.RotateAround(fleet.transform.position, Vector3.up, 20 * Time.deltaTime);
         }

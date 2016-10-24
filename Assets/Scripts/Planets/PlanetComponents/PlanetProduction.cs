@@ -7,14 +7,21 @@ using System.Linq;
 public class PlanetProduction : MonoBehaviour {
     // GameObject of a fleet of ships
     public GameObject fleetObject;
-    public GameObject shipObject;
+    public GameObject fighterObject;
+    public GameObject seedShipObject;
+    public GameObject scoutShipObject;
+    public GameObject lightCruiserObject;
+    public GameObject heavyCruiserObject;
+    public GameObject troopTransportObject;
 
     const string shipPrefix = "F3-";
 
     private Planet planet;
     private Color planetAllegiance;
+    private GameObject shipTypeToCreate;
 
     void Awake() {
+        shipTypeToCreate = fighterObject;
     }
 
     void Start() {
@@ -23,7 +30,13 @@ public class PlanetProduction : MonoBehaviour {
     }
 
     void Update() {
-
+        if (Input.GetKeyDown("f")) {
+            Debug.Log("Making fighters");
+            shipTypeToCreate = fighterObject;
+        } else if (Input.GetKeyDown("h")) {
+            Debug.Log("Making heavy cruisers");
+            shipTypeToCreate = heavyCruiserObject;
+        }
     }
 
     /**
@@ -33,7 +46,7 @@ public class PlanetProduction : MonoBehaviour {
      */
     public void createShip() {
         GameObject fleet = findOrCreateFleet(planet.getFleetsOverPlanet());
-        GameObject newShip = (GameObject) Instantiate (shipObject);
+        GameObject newShip = (GameObject) Instantiate (shipTypeToCreate);
         
         // Add ship to fleet
         Methods.addGameObjectAsChild(fleet, newShip);
