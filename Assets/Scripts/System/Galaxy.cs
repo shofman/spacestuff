@@ -20,7 +20,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     public GameObject launcherObject;
 
     //Name of the object that houses the trade routes for this galaxy
-    public const string TRADE_ROUTE_HOLDER = "TradeRouterHolder"; 
+    private const string TRADE_ROUTE_HOLDER = "TradeRouterHolder";
 
     // List of planets within this galaxy
     GameObject[,] listOfPlanets;
@@ -58,36 +58,13 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
      * On intialization, create necessary child gameObject, setup random generator, and initialize required variables
      */
     void Awake() {
-        planetsHolder = createEmptyGameObject("PlanetsHolder");
-        tradeRouteHolder = createEmptyGameObject(TRADE_ROUTE_HOLDER);
+        planetsHolder = Methods.createEmptyGameObject(this.gameObject, "PlanetsHolder");
+        tradeRouteHolder = Methods.createEmptyGameObject(this.gameObject, TRADE_ROUTE_HOLDER);
         random = new System.Random();
         connectedGalaxies = new List<GameObject>();
         launchersList = new List<GameObject>();
     }
 
-    /**
-     * Finds a game object of the children with a particular name, or creates it
-     * @param name - The name of the parent gameObject we are wanting to find the game object
-     * @return GameObject - created or found game object with the given name
-     */
-    GameObject createEmptyGameObject(string name) {
-        GameObject generic = null;
-        bool found = false;
-
-        Transform[] transforms = this.GetComponentsInChildren<Transform>();
-        foreach (Transform t in transforms) {
-            if (t.gameObject.name == name) {
-                generic = t.gameObject;
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            generic = new GameObject(name);
-            generic.transform.parent = this.transform;
-        }
-        return generic;
-    }
 
     /**
      * Responsible for setting up and creating the planets in a particular galaxy

@@ -36,7 +36,7 @@ public class MoveFleet : MonoBehaviour {
     public void moveShip() {
         ShipDisplay display = shipDisplay.GetComponent<ShipDisplay>();
         if (display.areMultipleFleetsOverPlanet()) {
-            display.toggleDisplayShipsOnPlanet();
+            display.toggleDisplayShipsOnPlanet(true);
             Debug.Log("Which fleet?");
         } else {
             display.disablePlanetOverviewMenu();

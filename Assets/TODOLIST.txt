@@ -17,18 +17,17 @@ Bugs
 * When there is a large amount of entries in a scroll list, clicking down to drag triggers the movement of the camera
 * Cycle was possible within galaxy - formed triangle with three planets
 * When the number of planets is too great, the name generator fails (since it doesn't take into account the number of planets needed)
-* Move ships de-re
-
+* Screen moves away when trying to end turn - need to figure out some way of detecting when the mouse is heading towards the outside (end turn button or closing the planet menu)
+    - (possibly introduce timer - only move after a few milliseconds)
+* When ship display is active, and the user creates a new ship, it should be added to the display
+    - Same when the fleet arrives at a new planet - the newly arrived ships aren't displayed
 
 
 Features
 ========
 * Fleets need to specify an allegiance - currently color, replace with allegiance class
-* Introduce the concept of different types of ships
 * Ability to cancel ship movement at end of turn (in case of enemy fleet appears)
     - Possibly introduce undo?
-* Add ability to limit distance of ships
-    - Figure out how to deal with slower ships - should be handled (address when different types of ships are present)
 * Figure out how to deal with situation where two fleets are travelling together - need method of combining them together
 * Ability to select which fleet you want to move when there are multiple on the planet
 * Randomly generated textures on the planets - add different biomes
@@ -40,7 +39,6 @@ Features
     - Add a random component for the amount of entry points between them
 * Move galaxies at random
 * Untangle trade routes and move into random pattern
-* Need to be able to move fleets to other galaxies (scroll to side of screen for movement ?)
 * Limit camera view to only what is available (or wrap around)
 * Refactor fleets within planets code away into separate class - too available, too many public methods
 * Prevent ships from being created when occupied by foreign ship (or immediately engage in combat?)

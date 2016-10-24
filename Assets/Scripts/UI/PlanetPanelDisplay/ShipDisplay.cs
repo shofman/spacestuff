@@ -31,21 +31,33 @@ public class ShipDisplay : Display {
     }
 
     /**
+     * Unity cannot handle a nullable as part of the click - expose public method here without parameters to send default value in
+     */
+    public void displayShipsButtonClick() {
+        toggleDisplayShipsOnPlanet();
+    }
+
+    /**
      * List all the ships currently on the planet
      */
-    public void toggleDisplayShipsOnPlanet() {
+    public void toggleDisplayShipsOnPlanet(bool? shouldShowDisplay = null) {
         if (getPlanet() != null) {
             List<GameObject> fleets = getFleets();
             if (fleets.Any()) {
-                showingShipScrollbar = !showingShipScrollbar;
+                bool currentlyShowingScrollbar = showingShipScrollbar;
+                if (shouldShowDisplay != null) {
+                    showingShipScrollbar = shouldShowDisplay.GetValueOrDefault();
+                } else {
+                    showingShipScrollbar = !showingShipScrollbar;
+                }
                 shipDisplayScrollbar.SetActive(showingShipScrollbar);
-                if (showingShipScrollbar) {
+                if (showingShipScrollbar && !currentlyShowingScrollbar) {
                     int fleetIndex = 0;
                     foreach (var fleet in fleets) {
                         fleetIndex++;
                         createFleetAndShipViews(fleet, fleetIndex);
                     }
-                } else {
+                } else if (!showingShipScrollbar) {
                     foreach (Transform child in fleetHolder.transform) {
                         GameObject.Destroy(child.gameObject);
                     }

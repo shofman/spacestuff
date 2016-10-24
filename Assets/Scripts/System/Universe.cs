@@ -45,25 +45,6 @@ public class Universe : MonoBehaviour {
         }
     }
 
-    GameObject createEmptyGameObject(string name) {
-        GameObject generic = null;
-        bool found = false;
-
-        Transform[] transforms = this.GetComponentsInChildren<Transform>();
-        foreach (Transform t in transforms) {
-            if (t.gameObject.name == name) {
-                generic = t.gameObject;
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            generic = new GameObject(name);
-            generic.transform.parent = this.transform;
-        }
-        return generic;
-    }
-
     // Use this for initialization
     void Start () {
         connectGalaxies();
