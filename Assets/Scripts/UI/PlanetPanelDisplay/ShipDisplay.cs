@@ -27,6 +27,7 @@ public class ShipDisplay : Display {
         if (getPlanet() != null) {
             getPlanet().GetComponent<PlanetProduction>().createShip();
             validateMoveShipButton();
+            updateShipListingForPlanet();
         }
     }
 
@@ -43,26 +44,37 @@ public class ShipDisplay : Display {
     public void toggleDisplayShipsOnPlanet(bool? shouldShowDisplay = null) {
         if (getPlanet() != null) {
             List<GameObject> fleets = getFleets();
+
             if (fleets.Any()) {
-                bool currentlyShowingScrollbar = showingShipScrollbar;
                 if (shouldShowDisplay != null) {
                     showingShipScrollbar = shouldShowDisplay.GetValueOrDefault();
                 } else {
                     showingShipScrollbar = !showingShipScrollbar;
                 }
+
                 shipDisplayScrollbar.SetActive(showingShipScrollbar);
-                if (showingShipScrollbar && !currentlyShowingScrollbar) {
+                removeShipsFromDisplay();
+                if (showingShipScrollbar) {
                     int fleetIndex = 0;
                     foreach (var fleet in fleets) {
                         fleetIndex++;
                         createFleetAndShipViews(fleet, fleetIndex);
                     }
-                } else if (!showingShipScrollbar) {
-                    foreach (Transform child in fleetHolder.transform) {
-                        GameObject.Destroy(child.gameObject);
-                    }
                 }
+            } else if (showingShipScrollbar) {
+                // No fleets and still showing scrollbar - hide it
+                deactivateShipDisplay();
             }
+        }
+    }
+
+    /**
+     * Updates the scrollbar displaying the list of ships
+     */
+    public void updateShipListingForPlanet() {
+        if (showingShipScrollbar) {
+            removeShipsFromDisplay();
+            toggleDisplayShipsOnPlanet(true);
         }
     }
 
@@ -94,6 +106,25 @@ public class ShipDisplay : Display {
     public void deactivateShipDisplay() {
         shipDisplayScrollbar.SetActive(false);
         showingShipScrollbar = false;
+        removeShipsFromDisplay();
+    }
+
+    /**
+     * Removes all ship entries from the fleet holder (so they don't appear on other planet displays)
+     */
+    private void removeShipsFromDisplay() {
+        if (fleetHolder != null) {
+            foreach (Transform child in fleetHolder.transform) {
+                GameObject.Destroy(child.gameObject);
+            }
+        }
+    }
+
+    /**
+     * Returns whether or not we are currently showing the 
+     */
+    private bool currentlyShowingShipScrollbar() {
+        return showingShipScrollbar;
     }
 
     /**

@@ -3,7 +3,7 @@ using UnityEngine;
  * Class allows the camera to move around the screen upon a click and drag
  * Also allows the user to zoom in with a right click (and drag)
  */
-public class CameraDrag : MonoBehaviour {
+public class CameraMovement : MonoBehaviour {
     public float dragSpeedXY = 5;
     private Vector3 dragOrigin;
 

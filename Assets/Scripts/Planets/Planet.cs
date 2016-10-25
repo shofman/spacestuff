@@ -135,6 +135,9 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
         // Set the name for the planet display tab
         planetDisplay.GetComponent<PlanetDisplay>().setName(planetName);
 
+        // Update the fleet selection for this planet
+        shipDisplay.GetComponent<ShipDisplay>().updateShipListingForPlanet();
+
         // Set the garrison amount for the troop display tab
         troopDisplay.GetComponent<TroopDisplay>().setGarrisons(garrisons);
 
@@ -364,6 +367,7 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     public void setFleet(GameObject fleet) {
         fleetOverPlanet.Add(fleet);
         shipDisplay.GetComponent<ShipDisplay>().validateMoveShipButton();
+        shipDisplay.GetComponent<ShipDisplay>().updateShipListingForPlanet();
     }
 
     /**

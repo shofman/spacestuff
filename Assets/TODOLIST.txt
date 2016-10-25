@@ -5,23 +5,18 @@ Bugs
     NullReferenceException: Object reference not set to an instance of an object
     BreadthFirstSearch.breadthFirstSearchPath[Planet] (UnityEngine.GameObject[,] listOfPlanets, UnityEngine.GameObject initialNode, UnityEngine.GameObject targetNode) (at Assets/Scripts/Search/BreadthFirstSearch.cs:62)
     Galaxy.bfsGalaxy (UnityEngine.GameObject startNode, UnityEngine.GameObject targetNode) (at Assets/Scripts/System/Galaxy.cs:377)
-    Planet.moveFleet (UnityEngine.GameO
-    bject planetToMoveTo) (at Assets/Scripts/Planets/Planet.cs:404)
+    Planet.moveFleet (UnityEngine.GameObject planetToMoveTo) (at Assets/Scripts/Planets/Planet.cs:404)
     Planet.OnPointerClick (UnityEngine.EventSystems.PointerEventData eventData) (at Assets/Scripts/Planets/Planet.cs:94)
     UnityEngine.EventSystems.ExecuteEvents.Execute (IPointerClickHandler handler, UnityEngine.EventSystems.BaseEventData eventData) (at C:/buildslave/unity/build/Extensions/guisystem/UnityEngine.UI/EventSystem/ExecuteEvents.cs:52)
     UnityEngine.EventSystems.ExecuteEvents.Execute[IPointerClickHandler] (UnityEngine.GameObject target, UnityEngine.EventSystems.BaseEventData eventData, UnityEngine.EventSystems.EventFunction`1 functor) (at C:/buildslave/unity/build/Extensions/guisystem/UnityEngine.UI/EventSystem/ExecuteEvents.cs:269)
     UnityEngine.EventSystems.EventSystem:Update()
 
-* When switching between views, ensure that ship display is toggled off.
-    - Select planet with ships. Toggle display on. Switch to planet without ships. Display still visible, and untogglable off.
-* When there is a large amount of entries in a scroll list, clicking down to drag triggers the movement of the camera
+* When there is a large amount of entries in a scroll list (i.e. fleet listing), clicking down to drag triggers the movement of the camera
 * Cycle was possible within galaxy - formed triangle with three planets
 * When the number of planets is too great, the name generator fails (since it doesn't take into account the number of planets needed)
 * Screen moves away when trying to end turn - need to figure out some way of detecting when the mouse is heading towards the outside (end turn button or closing the planet menu)
     - (possibly introduce timer - only move after a few milliseconds)
-* When ship display is active, and the user creates a new ship, it should be added to the display
-    - Same when the fleet arrives at a new planet - the newly arrived ships aren't displayed
-
+* Adding a large amount of ships to the fleet display performs poorly (especially opening and closing) - possibly better to shift the entries over and hide them rather than deleting them
 
 Features
 ========
@@ -33,7 +28,7 @@ Features
 * Randomly generated textures on the planets - add different biomes
 * Different biomes need to have differing results on the planets
 * Unit tests
-* Battles between differing allegiances
+* Battles between differing allegiances - should be more advanced than just 'my number is greater than yours'
 * Movements between galaxies
     - Should have multiple entry points for how close they are to relative galaxies ?
     - Add a random component for the amount of entry points between them

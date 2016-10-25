@@ -164,9 +164,8 @@ public class Fleet : MonoBehaviour, Observer {
         if (planets.Count > 0) {
             newMovementTarget = popNextDestination();
         } else {
-            newMovementTarget.GetComponent<Planet>().setFleet(this.gameObject);
+            landOnPlanet();
             isMoving = false;
-            orbitPlanet(newMovementTarget);
         }
     }
 
