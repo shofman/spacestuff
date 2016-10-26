@@ -16,6 +16,7 @@ public class Universe : MonoBehaviour {
     GameObject planetMenuDisplay;
 
     void Awake() {
+        numberOfGalaxies = 1;
         // 5000 seems to be alright
         NameGenerator nameGenerator = new NameGenerator(numberOfGalaxies * 22);
         availableNames = nameGenerator.generatePlanetNamesAsQueue();

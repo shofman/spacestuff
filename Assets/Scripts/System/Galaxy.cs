@@ -53,11 +53,12 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
 
     //List of Launchers (transports between galaxies) in this galaxy
     private List<GameObject> launchersList;
-    
+    private bool tempShow = false;
     /**
      * On intialization, create necessary child gameObject, setup random generator, and initialize required variables
      */
     void Awake() {
+        tempShow = true;
         planetsHolder = Methods.createEmptyGameObject(this.gameObject, "PlanetsHolder");
         tradeRouteHolder = Methods.createEmptyGameObject(this.gameObject, TRADE_ROUTE_HOLDER);
         random = new System.Random();
@@ -139,8 +140,17 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
                 removeEdgelessPlanets(listOfPlanets[i,j]);
             }
         }
-        // randomlyMoveFromCenter();
+        randomlyMoveFromCenter();
+        GameObject comparison = Instantiate(this.gameObject);
+        comparison.transform.position = new Vector3(250, 0, 0);
+        // comparison.GetComponent<Galaxy>().displayConnectedPlanets();
+        comparison.GetComponent<Galaxy>().setPermanent();
+        // forceDirectedLayout();
         displayConnectedPlanets();
+    }
+
+    public void setPermanent() {
+        tempShow = false;
     }
 
     /**
@@ -248,7 +258,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     /**
      * Display the connections between the planets as line renderers
      */
-    void displayConnectedPlanets() {
+    public void displayConnectedPlanets() {
         for (int i=0; i<planetRows; i++) {
             for (int j=0; j<planetColumns; j++) {
                 listOfPlanets[j,i].GetComponent<Planet>().displayTradeRoutes(tradeRouteHolder);
@@ -270,7 +280,24 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     
     // Update is called once per frame
     void Update () {
-
+        if(Input.GetKeyDown("q") && tempShow) {
+            List<GameObject> planets = getListOfPlanets();
+            Vector3[] positions = new Vector3[planets.Count];
+            int index = 0;
+            foreach (GameObject planet in planets) {
+                positions[index] = planet.transform.position;
+                index++;
+            }
+            for (int i=0; i<100; i++) {
+                positions = forceDirectedLayout(positions);
+            }
+            index = 0;
+            foreach (GameObject planet in planets) {
+                planet.transform.position = positions[index];
+                index++;
+            }
+            displayConnectedPlanets();
+        }
     }
 
     /**
@@ -474,6 +501,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
                 }
                 randomX = random.Next(0,30);
                 randomY = random.Next(0,30);
+                currentPosition = currentPlanet.transform.position;
                 if (isInBottomRightQuadrant(i,j)) {
                     currentPlanet.transform.position = new Vector3(currentPosition.x + randomX, currentPosition.y - randomY, currentPosition.z);
                     bottomRightPlanets.Add(currentPlanet);
@@ -482,6 +510,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
                 }
                 randomX = random.Next(0,30);
                 randomY = random.Next(0,30);
+                currentPosition = currentPlanet.transform.position;
                 if (isInTopRightQuadrant(i,j)) {
                     currentPlanet.transform.position = new Vector3(currentPosition.x + randomX, currentPosition.y + randomY, currentPosition.z);
                     topRightPlanets.Add(currentPlanet);
@@ -490,6 +519,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
                 }
                 randomX = random.Next(0,30);
                 randomY = random.Next(0,30);
+                currentPosition = currentPlanet.transform.position;
                 if (isInTopLeftQuadrant(i,j)) {
                     currentPlanet.transform.position = new Vector3(currentPosition.x - randomX, currentPosition.y + randomY, currentPosition.z);
                     topLeftPlanets.Add(currentPlanet);
@@ -525,6 +555,97 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
         // bottomRightPlanetAverage.name = "BTM RIGHT AVG";
         
 
+    }
+
+    /**
+     * Taken from https://cs.brown.edu/~rt/gdhandbook/chapters/force-directed.pdf:
+     *  To embed a graph we replace the vertices by steel rings and replace each edge with
+        a spring to form a mechanical system. The vertices are placed in some initial
+        layout and let go so that the spring forces on the rings move the system to a
+        minimal energy state. Two practical adjustments are made to this idea: firstly,
+        logarithmic strength springs are used; that is, the force exerted by a spring is:
+        c1 * log(d/c2),
+        where d is the length of the spring, and c1 and c2 are constants. Experience
+        shows that Hookes Law (linear) springs are too strong when the vertices are far
+        apart; the logarithmic force solves this problem. Note that the springs exert no
+        force when d = c2. Secondly, we make nonadjacent vertices repel each other. An
+        inverse square law force,
+        c3/d2,
+        where c3 is constant and d is the distance between the vertices, is suitable. The
+        mechanical system is simulated by the following algorithm.
+        algorithm SPRING(G:graph);
+        place vertices of G in random locations;
+        repeat M times
+        calculate the force on each vertex;
+        move the vertex c4 * (force on vertex)
+        draw graph on CRT or plotter.
+        The values c1 = 2, c2 = 1, c3 = 1, c4 = 0.1, are appropriate for most graphs.
+        Almost all graphs achieve a minimal energy state after the simulation step is
+        run 100 times, that is, M = 100.
+
+     */
+    private Vector3[] forceDirectedLayout(Vector3[] positions) {
+        List<GameObject> planets = getListOfPlanets();
+        float c4 = 0.1f;
+        
+        for (int i=0; i<planets.Count; i++) {
+            GameObject planet = planets[i];
+            Vector2 forces = calculateForceOnPlanet(planet, planets);
+            forces *= c4;
+            positions[i] += new Vector3(forces.x, forces.y, 0);
+            // positionsnew Vector3(currentPos.x + forces.x, currentPos.y + forces.y, currentPos.z);
+        }
+        return positions;
+
+        // foreach (GameObject planet in planets) {
+        //     Vector3 currentPos = planet.transform.position;
+        // }
+
+    }
+
+    private float calcAttractiveForce(float optimalDistance, float actualDistance) {
+        return (actualDistance * actualDistance) / optimalDistance;
+    }
+
+    private float calcRepulsiveForce(float optimalDistance, float actualDistance) {
+        return -(optimalDistance * optimalDistance) / actualDistance;
+    }
+
+    private Vector2 calculateForceOnPlanet(GameObject currentPlanet, List<GameObject> allPlanets) {
+        int frameHeight = 100;
+        int frameWidth = 200;
+        int area = frameHeight * frameWidth;
+        float k = (float) Math.Sqrt(area/allPlanets.Count);
+        int c1 = 2;
+        int c2 = 1;
+        int c3 = 1;
+        List<GameObject> connectedPlanets = currentPlanet.GetComponent<Planet>().getConnectedObjects();
+        Vector2 baseForce = new Vector2(0.0f,0.0f);
+
+        foreach(GameObject planet in allPlanets) {
+            if (planet.GetInstanceID() != currentPlanet.GetInstanceID()) {
+                Vector2 planetaryDistance = calculateDistanceBetweenPlanets(currentPlanet, planet);
+                if (connectedPlanets.Contains(planet)) {
+                    // Find attractive force
+                    // TODO - see what happens when you switch the distance up to be a fixed spring length (or a random value based around the current distance)
+                    Vector2 attractiveForce = new Vector2( (float) (c1 * Math.Log(planetaryDistance.x/c2)), (float) (c1 * Math.Log(planetaryDistance.y/c2)));
+                    baseForce += attractiveForce;
+                } else {
+                    Vector2 repellingForce = new Vector2 ( c3 / planetaryDistance.x, c3 / planetaryDistance.y);
+                    baseForce -= repellingForce;
+                }
+            }
+        }
+        return baseForce;
+    }
+
+    private Vector2 calculateDistanceBetweenPlanets(GameObject planetOne, GameObject planetTwo) {
+        Vector3 posOne = planetOne.transform.position;
+        Vector3 posTwo = planetTwo.transform.position;
+        Vector3 distanceVector = new Vector3(posOne.x - posTwo.x, posOne.y - posTwo.y, posOne.z - posTwo.z);
+        float distance = Vector3.Distance(planetOne.transform.position, planetTwo.transform.position);
+        Vector2 simpleDistance = new Vector2(distance, distance);
+        return simpleDistance;
     }
 
     private Vector3 calcAveragePosition(List<GameObject> planets) {
