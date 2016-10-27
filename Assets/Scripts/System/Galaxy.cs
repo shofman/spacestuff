@@ -54,6 +54,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     //List of Launchers (transports between galaxies) in this galaxy
     private List<GameObject> launchersList;
     private bool tempShow = false;
+    private float temperature;
     /**
      * On intialization, create necessary child gameObject, setup random generator, and initialize required variables
      */
@@ -281,21 +282,21 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     // Update is called once per frame
     void Update () {
         if(Input.GetKeyDown("q") && tempShow) {
-            List<GameObject> planets = getListOfPlanets();
-            Vector3[] positions = new Vector3[planets.Count];
-            int index = 0;
-            foreach (GameObject planet in planets) {
-                positions[index] = planet.transform.position;
-                index++;
-            }
+
+            // int index = 0;
+            // foreach (GameObject planet in planets) {
+            //     positions[index] = planet.transform.position;
+            //     index++;
+            // }
             for (int i=0; i<100; i++) {
-                positions = forceDirectedLayout(positions);
+                temperatureForceDirectedLayout(i);
+                // forceDirectedLayout(new Vector3[100]);
             }
-            index = 0;
-            foreach (GameObject planet in planets) {
-                planet.transform.position = positions[index];
-                index++;
-            }
+            // index = 0;
+            // foreach (GameObject planet in planets) {
+            //     planet.transform.position = positions[index];
+            //     index++;
+            // }
             displayConnectedPlanets();
         }
     }
@@ -591,24 +592,105 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
         for (int i=0; i<planets.Count; i++) {
             GameObject planet = planets[i];
             Vector2 forces = calculateForceOnPlanet(planet, planets);
+            // Debug.Log("FORCES");
+            // Debug.Log(forces);
             forces *= c4;
             positions[i] += new Vector3(forces.x, forces.y, 0);
-            // positionsnew Vector3(currentPos.x + forces.x, currentPos.y + forces.y, currentPos.z);
+            planet.transform.position = new Vector3(planet.transform.position.x + forces.x, planet.transform.position.y + forces.y, planet.transform.position.z);
         }
         return positions;
 
         // foreach (GameObject planet in planets) {
         //     Vector3 currentPos = planet.transform.position;
         // }
-
     }
 
-    private float calcAttractiveForce(float optimalDistance, float actualDistance) {
-        return (actualDistance * actualDistance) / optimalDistance;
+    private void temperatureForceDirectedLayout(int time) {
+        List<GameObject> planets = getListOfPlanets();
+        int frameHeight = 300;
+        int frameWidth = 300;
+        int area = frameHeight * frameWidth;
+        float optimalDistance = (float) Math.Sqrt(area/planets.Count);
+        int c1 = 2;
+        int c2 = 1;
+        int c3 = 1;
+        Vector2 baseForce = new Vector2(0.0f,0.0f);
+        int springLength = 30;
+
+        float avgDistance = 0;
+        int total = 0;
+        foreach(GameObject currentPlanet in planets) {
+            List<GameObject> connectedPlanets = currentPlanet.GetComponent<Planet>().getConnectedObjects();
+            foreach(GameObject connection in connectedPlanets) {
+                total += 1;
+                avgDistance += Vector3.Distance(connection.transform.position, currentPlanet.transform.position); 
+            }
+            Vector3 displacement = new Vector3(0.0f,0.0f, 0.0f);
+            currentPlanet.GetComponent<Planet>().setDisplacement(displacement);
+        }
+        if (total != 0) {
+            // springLength = (int) (avgDistance / total);
+        }
+        List<PlanetLine> planetConnections = new List<PlanetLine>();
+
+        foreach(GameObject currentPlanet in planets) {
+            List<GameObject> connectedPlanets = currentPlanet.GetComponent<Planet>().getConnectedObjects();
+            
+            foreach(GameObject connection in connectedPlanets) {
+                PlanetLine edge = new PlanetLine(connection, currentPlanet);
+                if (!planetConnections.Contains(edge)) { // Haven't visited this edge yet
+                    planetConnections.Add(edge);
+                    Vector3 differenceVector = currentPlanet.transform.position - planet.transform.position;
+
+                    Vector3 newAttractiveVector = differenceVector.normalized * calcAttractiveForce(optimalDistance, differenceVector.magnitude, springLength);
+
+                    // Vector3 currentDisplacement = currentPlanet.GetComponent<Planet>().getDisplacement();
+                    currentPlanet.transform.position -= newAttractiveVector.normalized;
+                    // currentPlanet.GetComponent<Planet>().setDisplacement(currentDisplacement);
+                    
+                    // Vector3 otherDisplacement = connection.GetComponent<Planet>().getDisplacement();
+                    connection.transform.position += newAttractiveVector.normalized;
+                    // connection.GetComponent<Planet>().setDisplacement(otherDisplacement);
+                }
+            }
+        }
+        foreach(GameObject currentPlanet in planets) {
+            // Vector3 displacement = currentPlanet.GetComponent<Planet>().getDisplacement();
+            foreach(GameObject planet in planets) {
+                PlanetLine edge = new PlanetLine(planet, currentPlanet);
+                if (planet.GetInstanceID() != currentPlanet.GetInstanceID() && !planetConnections.Contains(edge)) {
+                    // Vector3 otherPlanetDisplacement = planet.GetComponent<Planet>().getDisplacement();
+                    Vector3 differenceVector = currentPlanet.transform.position - planet.transform.position;
+                    Vector3 repulsiveVector = differenceVector.normalized * calcRepulsiveForce(optimalDistance, differenceVector.magnitude);
+                    currentPlanet.transform.position += repulsiveVector.normalized;
+                    planet.transform.position -= repulsiveVector.normalized;
+                    // planet.GetComponent<Planet>().setDisplacement(otherPlanetDisplacement);
+                }
+            }
+            // currentPlanet.GetComponent<Planet>().setDisplacement(displacement);
+        }
+
+
+        // foreach (GameObject currentPlanet in planets) {
+        //     Vector3 position = currentPlanet.transform.position;
+        //     Vector3 currentDisplacement = currentPlanet.GetComponent<Planet>().getDisplacement();
+        //     position += (currentDisplacement.normalized);
+        //     currentPlanet.transform.position = position;
+        // }
     }
 
+    private float getTemperature(int time) {
+        return (float) (4.0f*Math.Pow((200/10), -2*time));
+    }
+    // force = K_s * ( distance - L ) where L = ... // spring rest length and  K_s = ... // spring constant 
+    private float calcAttractiveForce(float optimalDistance, float actualDistance, int springLength) {
+        // return (actualDistance * actualDistance) / optimalDistance;
+        return (float) Math.Pow(10.0f, ((actualDistance - springLength) * (actualDistance - springLength)));
+    }
+    //  force = K_r / distanceSquared where  K_r = ... // repulsive force constant
     private float calcRepulsiveForce(float optimalDistance, float actualDistance) {
-        return -(optimalDistance * optimalDistance) / actualDistance;
+        // return (optimalDistance * optimalDistance) / actualDistance;
+        return 50.0f / ( actualDistance * actualDistance * actualDistance * actualDistance);
     }
 
     private Vector2 calculateForceOnPlanet(GameObject currentPlanet, List<GameObject> allPlanets) {
@@ -624,28 +706,35 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
 
         foreach(GameObject planet in allPlanets) {
             if (planet.GetInstanceID() != currentPlanet.GetInstanceID()) {
-                Vector2 planetaryDistance = calculateDistanceBetweenPlanets(currentPlanet, planet);
+                float planetaryDistance = calculateDistanceBetweenPlanets(currentPlanet, planet);
                 if (connectedPlanets.Contains(planet)) {
                     // Find attractive force
                     // TODO - see what happens when you switch the distance up to be a fixed spring length (or a random value based around the current distance)
-                    Vector2 attractiveForce = new Vector2( (float) (c1 * Math.Log(planetaryDistance.x/c2)), (float) (c1 * Math.Log(planetaryDistance.y/c2)));
+                    float xComp = 0; //float) (c1 * Math.Log(Math.Abs(planetaryDistance.x)/c2));
+                    float yComp = 0; //(float) (c1 * Math.Log(Math.Abs(planetaryDistance.y)/c2));
+                    Vector2 attractiveForce = new Vector2(xComp, yComp);
                     baseForce += attractiveForce;
                 } else {
-                    Vector2 repellingForce = new Vector2 ( c3 / planetaryDistance.x, c3 / planetaryDistance.y);
-                    baseForce -= repellingForce;
+                // if (planetaryDistance.x != 0 && planetaryDistance.y != 0) {
+                    // Debug.Log(planetaryDistance);
+                    // Vector2 repellingForce = new Vector2 ( c3 / planetaryDistance.x, c3 / planetaryDistance.y);
+                    // baseForce -= repellingForce;
                 }
             }
+            // Debug.Log(baseForce);
         }
+        // Debug.Log("RETURNING WITH: " + baseForce);
+        // Debug.Log("");
         return baseForce;
     }
 
-    private Vector2 calculateDistanceBetweenPlanets(GameObject planetOne, GameObject planetTwo) {
+    private float calculateDistanceBetweenPlanets(GameObject planetOne, GameObject planetTwo) {
         Vector3 posOne = planetOne.transform.position;
         Vector3 posTwo = planetTwo.transform.position;
-        Vector3 distanceVector = new Vector3(posOne.x - posTwo.x, posOne.y - posTwo.y, posOne.z - posTwo.z);
+        Vector3 distanceVector = posOne - posTwo;
         float distance = Vector3.Distance(planetOne.transform.position, planetTwo.transform.position);
-        Vector2 simpleDistance = new Vector2(distance, distance);
-        return simpleDistance;
+        // Vector2 simpleDistance = new Vector2(distanceVector.x, distanceVector.y);
+        return distance;
     }
 
     private Vector3 calcAveragePosition(List<GameObject> planets) {

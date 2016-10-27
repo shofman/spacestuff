@@ -46,6 +46,8 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     private Color planetColor;
     private GameObject nameDisplay;
 
+    private Vector3 displacement;
+
     // Boolean for detecting whether we are trying to transfer a fleet to this planet
     bool isTransferingAFleet = false;
 
@@ -76,6 +78,14 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     // Update is called once per frame
     void Update () {
 
+    }
+
+    public void setDisplacement(Vector3 newDisp) {
+        this.displacement = newDisp;
+    }
+
+    public Vector3 getDisplacement() {
+        return this.displacement;
     }
 
     /**
