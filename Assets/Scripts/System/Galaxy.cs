@@ -53,7 +53,9 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
 
     //List of Launchers (transports between galaxies) in this galaxy
     private List<GameObject> launchersList;
-    
+
+    private int frameWidth = 20;
+    private int frameHeight = 20;
     /**
      * On intialization, create necessary child gameObject, setup random generator, and initialize required variables
      */
@@ -63,6 +65,9 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
         random = new System.Random();
         connectedGalaxies = new List<GameObject>();
         launchersList = new List<GameObject>();
+
+        planetRows = random.Next(2,7);
+        planetColumns = random.Next(2,7);
     }
 
 
@@ -82,7 +87,8 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
 
         listOfPlanets = new GameObject[planetColumns,planetRows];
 
-        int totalBluePlanets = planetRows*planetColumns/2;
+        // If odd, one planet doesn't get assigned. Add 1 and let random selection determine which system the planet belongs to
+        int totalBluePlanets = (planetRows*planetColumns/2) + ((planetRows*planetColumns)%2);
         int totalRedPlanets = totalBluePlanets;
 
         bool hasCreatedLauncher = false;
@@ -139,7 +145,11 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
                 removeEdgelessPlanets(listOfPlanets[i,j]);
             }
         }
-        // randomlyMoveFromCenter();
+        randomlyMovePlanets();
+        for (int i=0; i<50; i++) {
+            temperatureForcedDirectedGraph();
+        }
+        // TODO - check for edge crossings here - if so, delete object and return false
         displayConnectedPlanets();
     }
 
@@ -248,7 +258,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     /**
      * Display the connections between the planets as line renderers
      */
-    void displayConnectedPlanets() {
+    public void displayConnectedPlanets() {
         for (int i=0; i<planetRows; i++) {
             for (int j=0; j<planetColumns; j++) {
                 listOfPlanets[j,i].GetComponent<Planet>().displayTradeRoutes(tradeRouteHolder);
@@ -444,106 +454,131 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
         }
     }
 
-    private void randomlyMoveFromCenter() {
-        List<GameObject> bottomLeftPlanets = new List<GameObject>();
-        List<GameObject> topLeftPlanets = new List<GameObject>();
-        List<GameObject> bottomRightPlanets = new List<GameObject>();
-        List<GameObject> topRightPlanets = new List<GameObject>();
-        float bottomLeftAverageX = 0;
-        float bottomLeftAverageY = 0;
-        float bottomRightAverageX = 0;
-        float bottomRightAverageY = 0;
-        float topLeftAverageX = 0;
-        float topLeftAverageY = 0;
-        float topRightAverageX = 0;
-        float topRightAverageY = 0;
-
-        int totalCount = 0;
+    /**
+     * Randomly moves planets 
+     */
+    private void randomlyMovePlanets() {
         for (int i=0; i<planetRows; i++) {
             for (int j=0; j<planetColumns; j++) {
-                totalCount++;
                 GameObject currentPlanet = listOfPlanets[j,i];
-                Vector3 currentPosition = currentPlanet.transform.position;
-                int randomX = random.Next(0,30);
-                int randomY = random.Next(0,30);
+
                 if (isInBottomLeftQuadrant(i, j)) {
-                    currentPlanet.transform.position = new Vector3(currentPosition.x - randomX, currentPosition.y - randomY, currentPosition.z);
-                    bottomLeftAverageX += currentPlanet.transform.position.x;
-                    bottomLeftAverageY += currentPlanet.transform.position.y;
-                    bottomLeftPlanets.Add(currentPlanet);
+                    movePlanetToRandomPosition(currentPlanet, false, false);
                 }
-                randomX = random.Next(0,30);
-                randomY = random.Next(0,30);
+
                 if (isInBottomRightQuadrant(i,j)) {
-                    currentPlanet.transform.position = new Vector3(currentPosition.x + randomX, currentPosition.y - randomY, currentPosition.z);
-                    bottomRightPlanets.Add(currentPlanet);
-                    bottomRightAverageX += currentPlanet.transform.position.x;
-                    bottomRightAverageY += currentPlanet.transform.position.y;
+                    movePlanetToRandomPosition(currentPlanet, true, false);
                 }
-                randomX = random.Next(0,30);
-                randomY = random.Next(0,30);
+
                 if (isInTopRightQuadrant(i,j)) {
-                    currentPlanet.transform.position = new Vector3(currentPosition.x + randomX, currentPosition.y + randomY, currentPosition.z);
-                    topRightPlanets.Add(currentPlanet);
-                    topRightAverageX += currentPlanet.transform.position.x;
-                    topRightAverageY += currentPlanet.transform.position.y;
+                    movePlanetToRandomPosition(currentPlanet, true, true);
                 }
-                randomX = random.Next(0,30);
-                randomY = random.Next(0,30);
+
                 if (isInTopLeftQuadrant(i,j)) {
-                    currentPlanet.transform.position = new Vector3(currentPosition.x - randomX, currentPosition.y + randomY, currentPosition.z);
-                    topLeftPlanets.Add(currentPlanet);
-                    topLeftAverageX += currentPlanet.transform.position.x;
-                    topLeftAverageY += currentPlanet.transform.position.y;
+                    movePlanetToRandomPosition(currentPlanet, false, true);
+                }
+            }
+        }
+    }
+
+    /**
+     * Moves the target planet to a random position
+     * @param planet - the current planet we want to move
+     * @shouldAddX - Whether we want to add the random x value or subtract it from our current position
+     * @shouldAddY - Whether we want to add the random y value or subtract it from our current position
+     */
+    private void movePlanetToRandomPosition(GameObject planet, bool shouldAddX, bool shouldAddY) {
+        Vector3 currentPosition = planet.transform.position;
+        Vector2 randomMovement = new Vector2(random.Next(0,30), random.Next(0,30));
+        float newXPos = currentPosition.x + (shouldAddX ? randomMovement.x : -randomMovement.x);
+        float newYPos = currentPosition.y + (shouldAddY ? randomMovement.y : -randomMovement.y);
+        planet.transform.position = new Vector3(newXPos, newYPos, currentPosition.z);
+    }
+
+    /**
+     * Calculates the force that pulls the planets together
+     */
+    private float calcAttractiveForce(float optimalDistance, float actualDistance) {
+        return (float) Math.Pow(actualDistance, 2) / optimalDistance;
+    }
+
+    /**
+     * Calculates the force that pushes the planets apart
+     */
+    private float calcRepulsiveForce(float optimalDistance, float actualDistance) {
+        return (float) Math.Pow(optimalDistance, 2) / actualDistance;
+    }
+
+    /**
+     * Creates a forced directed graph from https://cs.brown.edu/~rt/gdhandbook/chapters/force-directed.pdf
+     */
+    private void temperatureForcedDirectedGraph() {
+        int area = frameWidth * frameHeight;
+        List<GameObject> allPlanets = getListOfPlanets();
+        float optimalDistance = (float) (3.0f * Math.Sqrt(area/allPlanets.Count));
+
+        /**
+         * For each planet, push them apart from the others 
+         */
+        foreach (GameObject currentPlanet in allPlanets) {
+            currentPlanet.GetComponent<Planet>().setDisplacement(new Vector3(0,0,0));
+            foreach (GameObject otherPlanet in allPlanets) {
+                if (currentPlanet.GetInstanceID() != otherPlanet.GetInstanceID()) {
+                    Vector3 differenceVector = currentPlanet.transform.position - otherPlanet.transform.position;
+                    Vector3 currentDisplacement = currentPlanet.GetComponent<Planet>().getDisplacement();
+                    Vector3 newDisplacement = currentDisplacement + (differenceVector.normalized * calcRepulsiveForce(optimalDistance, differenceVector.magnitude));
+                    currentPlanet.GetComponent<Planet>().setDisplacement(newDisplacement);
                 }
             }
         }
 
-        bottomLeftAverageX /= bottomLeftPlanets.Count;
-        bottomLeftAverageY /= bottomLeftPlanets.Count;
-        bottomRightAverageX /= bottomRightPlanets.Count;
-        bottomRightAverageY /= bottomRightPlanets.Count;
-        topLeftAverageX /= topLeftPlanets.Count;
-        topLeftAverageY /= topLeftPlanets.Count;
-        topRightAverageX /= topRightPlanets.Count;
-        topRightAverageY /= topRightPlanets.Count;
-
-        // GameObject bottomLeftPlanetAverage = (GameObject)Instantiate(planet);
-        // bottomLeftPlanetAverage.transform.position = new Vector3(bottomLeftAverageX, bottomLeftAverageY, 0);
-        // bottomLeftPlanetAverage.name = "BTM LEFT AVG";
-
-        // GameObject topLeftPlanetAverage = (GameObject)Instantiate(planet);
-        // topLeftPlanetAverage.transform.position = new Vector3(topLeftAverageX, topLeftAverageY, 0);
-        // topLeftPlanetAverage.name = "TOP LEFT AVG";
-
-        // GameObject topRightPlanetAverage = (GameObject)Instantiate(planet);
-        // topRightPlanetAverage.transform.position = new Vector3(topRightAverageX, topRightAverageY, 0);
-        // topRightPlanetAverage.name = "TOP RIGHT AVG";
-
-        // GameObject bottomRightPlanetAverage = (GameObject)Instantiate(planet);
-        // bottomRightPlanetAverage.transform.position = new Vector3(bottomRightAverageX, bottomRightAverageY, 0);
-        // bottomRightPlanetAverage.name = "BTM RIGHT AVG";
-        
-
-    }
-
-    private Vector3 calcAveragePosition(List<GameObject> planets) {
-        float averageX = 0;
-        float averageY = 0;
-
-        foreach (GameObject planet in planets) {
-            averageX += planet.transform.position.x;
-            averageY += planet.transform.position.y;
+        /**
+         * For each edge, pull their two planets closer towards each other
+         */
+        List<PlanetLine> graphEdges = new List<PlanetLine>();
+        foreach (GameObject currentPlanet in allPlanets) {
+            List<GameObject> connections = currentPlanet.GetComponent<Planet>().getConnectedObjects();
+            foreach(GameObject otherPlanet in connections) {
+                PlanetLine edge = new PlanetLine(currentPlanet, otherPlanet);
+                if (!graphEdges.Contains(edge)) {
+                    graphEdges.Add(edge);
+                    Vector3 differenceVector = currentPlanet.transform.position - otherPlanet.transform.position;
+                    Vector3 currentDisplacement = currentPlanet.GetComponent<Planet>().getDisplacement();
+                    Vector3 otherDisplacement = otherPlanet.GetComponent<Planet>().getDisplacement();
+                    Vector3 newCurrentDisplacement = currentDisplacement - (differenceVector.normalized * calcAttractiveForce(optimalDistance, differenceVector.magnitude));
+                    Vector3 newOtherDisplacement = otherDisplacement + (differenceVector.normalized * calcAttractiveForce(optimalDistance, differenceVector.magnitude));
+                    currentPlanet.GetComponent<Planet>().setDisplacement(newCurrentDisplacement);
+                    otherPlanet.GetComponent<Planet>().setDisplacement(newOtherDisplacement);
+                }
+            }
         }
-        averageX /= planets.Count;
-        averageY /= planets.Count;
-        return new Vector3(averageX, averageY, 0);
+
+        // Move the planets by their calculated forces
+        foreach (GameObject currentPlanet in allPlanets) {
+            Vector3 currentPos = currentPlanet.transform.position;
+            Vector3 displacementVector = currentPlanet.GetComponent<Planet>().getDisplacement();
+            currentPlanet.transform.position = currentPos + ((displacementVector.normalized) * Math.Min(displacementVector.magnitude, getTemp()));
+        }
     }
 
+    /**
+     * Returns a minimum distance that a planet can move
+     */
+    private float getTemp() {
+        return (float) frameWidth / 10;
+    }
+
+    /**
+     * Returns whether the planet is in the bottom left of the galaxy
+     */
     private bool isInBottomLeftQuadrant(int rowPos, int columnPos) {
         return (rowPos <= (planetRows-1)/2) && (columnPos <= (planetColumns-1)/2);
     }
 
+    /**
+     * Returns whether the planet is in the bottom right part of the galaxy
+     * In the case where there are an odd amount of columns 
+     */
     private bool isInBottomRightQuadrant(int rowPos, int columnPos) {
         if (planetColumns % 2 == 1) {
             return (rowPos <= (planetRows-1)/2) && (columnPos >= (planetColumns-1)/2);
@@ -552,14 +587,24 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
         }
     }
 
+    /**
+     * Returns whether the planet is in the top right part of the galaxy
+     * If there is an odd amount of rows or columns, we include the remaining one when dividing by two in both 
+     * the top and the right quadrants
+     */
     private bool isInTopRightQuadrant(int rowPos, int columnPos) {
         bool isInRow = (planetRows % 2 == 1) ? (rowPos >= (planetRows-1)/2) : (rowPos > (planetRows-1)/2);
         bool isInColumn  = (planetColumns % 2 == 1) ? (columnPos >= (planetColumns-1)/2) : (columnPos > (planetColumns-1)/2);
         return isInRow && isInColumn;
     }
 
+    /**
+     * Returns whether the planet is in the top left of the galaxy
+     * If there are an odd amount of rows, there's one that won't belong to either top or bottom
+     * In that case, include it in both top and bottom
+     */
     private bool isInTopLeftQuadrant(int rowPos, int columnPos) {
-        if (planetRows % 2 == 1) {
+        if (planetRows % 2 == 1) { 
             return (rowPos >= (planetRows-1)/2) && (columnPos <= (planetColumns-1)/2);
         } else {
             return (rowPos > (planetRows-1)/2) && (columnPos <= (planetColumns-1)/2);
