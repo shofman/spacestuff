@@ -15,10 +15,11 @@ Bugs
 * Cycle was possible within galaxy - formed triangle with three planets
 * When the number of planets is too great, the name generator fails (since it doesn't take into account the number of planets needed)
 * Screen moves away when trying to end turn - need to figure out some way of detecting when the mouse is heading towards the outside (end turn button or closing the planet menu)
-    - (possibly introduce timer - only move after a few milliseconds)
 * Adding a large amount of ships to the fleet display performs poorly (especially opening and closing) - possibly better to shift the entries over and hide them rather than deleting them
-* Sometimes planets will appear on-top of each other. Need to prevent that 
-* Getting transform infinity errors or NaN when attempting to set the planet position. Both occurred 50 times...
+* Sometimes planets will appear on-top of each other. Need to prevent that (add a minimum distance that planets need to span?)
+* Sometimes planets will spawn atop trade route, but doesn't find edge
+    - Delete galaxies that have edges crossing / planets on trade route
+* Getting transform infinity errors or NaN when attempting to set the planet position in force directed graph. Both occurred 50 times...
 
 Features
 ========
@@ -42,3 +43,4 @@ Features
 * Prevent ships from being created when occupied by foreign ship (or immediately engage in combat?)
 * Add ownership concept - players not on the same team cannot move the ships that do not belong to them. 
 * Address TODO within codebase
+* Add bounding boxes around galaxies - ensure that they don't collide (possibly use force directed graphes on them)

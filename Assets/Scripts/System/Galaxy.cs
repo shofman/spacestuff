@@ -66,8 +66,8 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
         connectedGalaxies = new List<GameObject>();
         launchersList = new List<GameObject>();
 
-        planetRows = 5; //random.Next(2,7);
-        planetColumns = 5; //random.Next(2,7);
+        planetRows = random.Next(2,7);
+        planetColumns = random.Next(2,7);
     }
 
 
@@ -87,7 +87,8 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
 
         listOfPlanets = new GameObject[planetColumns,planetRows];
 
-        int totalBluePlanets = planetRows*planetColumns/2;
+        // If odd, one planet doesn't get assigned. Add 1 and let random selection determine which system the planet belongs to
+        int totalBluePlanets = (planetRows*planetColumns/2) + ((planetRows*planetColumns)%2);
         int totalRedPlanets = totalBluePlanets;
 
         bool hasCreatedLauncher = false;

@@ -71,7 +71,9 @@ public class Universe : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         if(Input.GetKeyDown("b")) {
-            listOfGalaxies[0,0].GetComponent<Galaxy>().findCrossingEdges();
+            for (int i=0; i<listOfGalaxies.GetLength(0); i++) {
+                listOfGalaxies[i,0].GetComponent<Galaxy>().findCrossingEdges();
+            }
         }
     }
 
