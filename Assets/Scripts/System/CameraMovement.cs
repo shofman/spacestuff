@@ -8,9 +8,9 @@ public class CameraMovement : MonoBehaviour {
     private Vector3 dragOrigin;
 
     const int zoomSizeMin = 13;
-    const int zoomSizeMax = 100;
+    const int zoomSizeMax = 130;
 
-    public int boundary = 50; // distance from edge scrolling starts
+    public int boundary = 100; // distance from edge scrolling starts
     private int screenWidth;
     private int screenHeight;
 
@@ -20,6 +20,11 @@ public class CameraMovement : MonoBehaviour {
     }
 
     void Update() {
+        // Prevent the scrolling when the mouse has left
+        if (!isMouseWithinScreenBoundaries()) {
+            return;
+        }
+
         if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) {
             dragOrigin = Input.mousePosition;
             return;
@@ -41,17 +46,38 @@ public class CameraMovement : MonoBehaviour {
         }
         Camera.main.fieldOfView = Mathf.Clamp(Camera.main.fieldOfView, zoomSizeMin, zoomSizeMax );
         
+        // Top speed should be 4.3, lowest speed should be .7. Solving simultaneous equations - 13x + y = .7 and 130x + y = 4.3 gives 2/65 and 3/10
+        float cameraZoomSpeedAdjustment = (Camera.main.fieldOfView * (2.0f / 65.0f)) + (3.0f/10.0f);
+
         // Shift the camera if the mouse is within 'boundary' distance of the corners
-        if (Input.mousePosition.x > screenWidth - boundary || Input.mousePosition.x < 0 + boundary) {
+        if (isMouseWithinXBoundary()) {
             Vector3 pos = getCameraRelativePos(getCenterOfCamera());
-            Vector3 move = new Vector3(pos.x * dragSpeedXY, 0, 0);
-            transform.Translate(move, Space.World);
+            Vector3 move = new Vector3(pos.x * dragSpeedXY * cameraZoomSpeedAdjustment, 0, 0);
+            if (isMouseWithinScreenBoundaries()) {
+                transform.Translate(move, Space.World);
+            }
         }
-        if (Input.mousePosition.y > screenHeight - boundary || Input.mousePosition.y < 0 + boundary) {
+        if (isMouseWithinYBoundary()) {
             Vector3 pos = getCameraRelativePos(getCenterOfCamera());
-            Vector3 move = new Vector3(0, pos.y * dragSpeedXY, 0);
-            transform.Translate(move, Space.World);
+            Vector3 move = new Vector3(0, pos.y * dragSpeedXY * cameraZoomSpeedAdjustment, 0);
+            if (isMouseWithinScreenBoundaries()) {
+                transform.Translate(move, Space.World);
+            }
         }
+    }
+
+    /**
+     * Whether the mouse is within the x boundary along the left and right sides of the screen
+     */
+    private bool isMouseWithinXBoundary() {
+        return Input.mousePosition.x > screenWidth - boundary || Input.mousePosition.x < 0 + boundary;
+    }
+
+    /**
+     * Whether the mouse is within the y boundary along the top and bottom sides of the screen
+     */
+    private bool isMouseWithinYBoundary() {
+        return Input.mousePosition.y > screenHeight - boundary || Input.mousePosition.y < 0 + boundary;
     }
 
     /**
@@ -66,5 +92,12 @@ public class CameraMovement : MonoBehaviour {
      */
     private Vector3 getCenterOfCamera() {
         return new Vector3(Screen.width / 2, Screen.height / 2, 0);
+    }
+
+    /**
+     * Determines whether the mouse is within the screen
+     */
+    private bool isMouseWithinScreenBoundaries() {
+        return (Input.mousePosition.y > 0 && Input.mousePosition.y < Screen.height && Input.mousePosition.x > 0 && Input.mousePosition.x < Screen.width);
     }
 }

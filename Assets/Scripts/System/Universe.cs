@@ -16,9 +16,8 @@ public class Universe : MonoBehaviour {
     GameObject planetMenuDisplay;
 
     void Awake() {
-        numberOfGalaxies = 1;
         // 5000 seems to be alright
-        NameGenerator nameGenerator = new NameGenerator(numberOfGalaxies * 22);
+        NameGenerator nameGenerator = new NameGenerator(numberOfGalaxies * 220);
         availableNames = nameGenerator.generatePlanetNamesAsQueue();
 
         universeUI = GameObject.Find("/UniverseDisplay");
@@ -28,7 +27,11 @@ public class Universe : MonoBehaviour {
 
         for (int i=0; i<listOfGalaxies.GetLength(0); i++) {
             GameObject galaxyCreated = (GameObject)Instantiate(galaxy);
-            galaxyCreated.transform.Translate(i*220, 0, 0);
+            int yPos = 0;
+            if (i%2==1) {
+                yPos = -100;
+            }
+            galaxyCreated.transform.Translate(i*220, yPos, 0);
             Galaxy galaxyScript = galaxyCreated.GetComponent<Galaxy>();
 
             // Each planet needs a name, plus the galaxy should be named
