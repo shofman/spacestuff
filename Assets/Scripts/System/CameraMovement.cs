@@ -14,7 +14,10 @@ public class CameraMovement : MonoBehaviour {
     private int screenWidth;
     private int screenHeight;
 
+    private Vector3 startingPos;
+
     void Start() {
+        startingPos = Camera.main.transform.position;
         screenWidth = Screen.width;
         screenHeight = Screen.height;
     }
@@ -23,6 +26,10 @@ public class CameraMovement : MonoBehaviour {
         // Prevent the scrolling when the mouse has left
         if (!isMouseWithinScreenBoundaries()) {
             return;
+        }
+
+        if (Input.GetKeyDown("space")) {
+            Camera.main.transform.position = startingPos;
         }
 
         if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) {

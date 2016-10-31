@@ -146,10 +146,14 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
             }
         }
         randomlyMovePlanets();
+        float distanceModifier = (float) random.Next(3,6);
         for (int i=0; i<50; i++) {
-            temperatureForcedDirectedGraph();
+            temperatureForcedDirectedGraph(distanceModifier);
         }
         // TODO - check for edge crossings here - if so, delete object and return false
+        if (areEdgesCrossing()) {
+            Debug.Log("WE HAVE EDGES CROSSING IN " + getName());
+        }
         displayConnectedPlanets();
     }
 
@@ -317,9 +321,17 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     }
 
     /**
+     * Returns whether there are edges crossing in this galaxy
+     */
+    public bool areEdgesCrossing() {
+        List<PlanetLine> crossingEdges = findCrossingEdges(true);
+        return crossingEdges.Count > 0;
+    }
+
+    /**
      * Finds where in this galaxy that the trade routes are crossing
      */
-    public List<PlanetLine> findCrossingEdges() {
+    public List<PlanetLine> findCrossingEdges(bool logOutPlanets = false) {
         // Get all the current trade routes
         List<PlanetLine> allTradeRoutes = new List<PlanetLine>();
         for (int i=0; i<planetRows; i++) {
@@ -331,7 +343,6 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
                 }
             }
         }
-        bool foundIntersection = false;
 
         List<PlanetLine> intersectionLines = new List<PlanetLine>();
         foreach (PlanetLine firstLine in allTradeRoutes) {
@@ -339,10 +350,11 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
                 if (!firstLine.containsSamePoint(secondLine) && !intersectionAlreadyFound(firstLine, secondLine, intersectionLines)) {
                     bool otherIntersection = lineIntersects(firstLine.planetOne, firstLine.planetTwo, secondLine.planetOne, secondLine.planetTwo);
                     if (otherIntersection) {
-                        foundIntersection = true;
                         intersectionLines.Add(firstLine);
                         intersectionLines.Add(secondLine);
-                        Debug.Log(firstLine.firstPlanet.GetComponent<Planet>().getName() + " " + firstLine.secondPlanet.GetComponent<Planet>().getName() + " " + secondLine.firstPlanet.GetComponent<Planet>().getName() + " " + secondLine.secondPlanet.GetComponent<Planet>().getName());
+                        if (logOutPlanets) {
+                            Debug.Log(firstLine.firstPlanet.GetComponent<Planet>().getName() + " " + firstLine.secondPlanet.GetComponent<Planet>().getName() + " " + secondLine.firstPlanet.GetComponent<Planet>().getName() + " " + secondLine.secondPlanet.GetComponent<Planet>().getName());
+                        }
                     }
                 }
             }
@@ -424,6 +436,9 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
         return gameObject.GetComponent<BreadthFirstSearch>().breadthFirstSearchPath<Planet>(listOfPlanets, startNode, targetNode);
     }
 
+    /**
+     * Class representing the trade routes between planets 
+     */
     public class PlanetLine : IEquatable<PlanetLine>{
         public GameObject firstPlanet;
         public GameObject secondPlanet;
@@ -511,11 +526,12 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
 
     /**
      * Creates a forced directed graph from https://cs.brown.edu/~rt/gdhandbook/chapters/force-directed.pdf
+     * @param optimalDistanceModifier - increases the distance between the planets
      */
-    private void temperatureForcedDirectedGraph() {
+    private void temperatureForcedDirectedGraph(float optimalDistanceModifier) {
         int area = frameWidth * frameHeight;
         List<GameObject> allPlanets = getListOfPlanets();
-        float optimalDistance = (float) (3.0f * Math.Sqrt(area/allPlanets.Count));
+        float optimalDistance = (float) (optimalDistanceModifier * Math.Sqrt(area/allPlanets.Count));
 
         /**
          * For each planet, push them apart from the others 
@@ -525,9 +541,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
             foreach (GameObject otherPlanet in allPlanets) {
                 if (currentPlanet.GetInstanceID() != otherPlanet.GetInstanceID()) {
                     Vector3 differenceVector = currentPlanet.transform.position - otherPlanet.transform.position;
-                    Vector3 currentDisplacement = currentPlanet.GetComponent<Planet>().getDisplacement();
-                    Vector3 newDisplacement = currentDisplacement + (differenceVector.normalized * calcRepulsiveForce(optimalDistance, differenceVector.magnitude));
-                    currentPlanet.GetComponent<Planet>().setDisplacement(newDisplacement);
+                    updateDisplacement(differenceVector, optimalDistance, currentPlanet, false);
                 }
             }
         }
@@ -543,12 +557,9 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
                 if (!graphEdges.Contains(edge)) {
                     graphEdges.Add(edge);
                     Vector3 differenceVector = currentPlanet.transform.position - otherPlanet.transform.position;
-                    Vector3 currentDisplacement = currentPlanet.GetComponent<Planet>().getDisplacement();
-                    Vector3 otherDisplacement = otherPlanet.GetComponent<Planet>().getDisplacement();
-                    Vector3 newCurrentDisplacement = currentDisplacement - (differenceVector.normalized * calcAttractiveForce(optimalDistance, differenceVector.magnitude));
-                    Vector3 newOtherDisplacement = otherDisplacement + (differenceVector.normalized * calcAttractiveForce(optimalDistance, differenceVector.magnitude));
-                    currentPlanet.GetComponent<Planet>().setDisplacement(newCurrentDisplacement);
-                    otherPlanet.GetComponent<Planet>().setDisplacement(newOtherDisplacement);
+
+                    updateDisplacement(differenceVector, optimalDistance, currentPlanet, true, true);
+                    updateDisplacement(differenceVector, optimalDistance, otherPlanet, true);
                 }
             }
         }
@@ -559,6 +570,27 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
             Vector3 displacementVector = currentPlanet.GetComponent<Planet>().getDisplacement();
             currentPlanet.transform.position = currentPos + ((displacementVector.normalized) * Math.Min(displacementVector.magnitude, getTemp()));
         }
+    }
+
+    /**
+     * Updates the displacement value for a planet
+     */
+    private void updateDisplacement(Vector3 differenceVector, float optimalDistance, GameObject planet, bool useAttractiveForce, bool subtractDifference = false) {
+        Planet planetScript = planet.GetComponent<Planet>();
+        Vector3 currentDisplacement = planetScript.getDisplacement();
+        float force;
+        if (useAttractiveForce) {
+            force = calcAttractiveForce(optimalDistance, differenceVector.magnitude);
+        } else {
+            force = calcRepulsiveForce(optimalDistance, differenceVector.magnitude);
+        }
+        Vector3 newCurrentDisplacement;
+        if (subtractDifference) {
+            newCurrentDisplacement = currentDisplacement - (differenceVector.normalized * force);
+        } else {
+            newCurrentDisplacement = currentDisplacement + (differenceVector.normalized * force);
+        }
+        planetScript.setDisplacement(newCurrentDisplacement);
     }
 
     /**

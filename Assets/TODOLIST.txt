@@ -20,6 +20,11 @@ Bugs
 * Sometimes planets will spawn atop trade route, but doesn't find edge
     - Delete galaxies that have edges crossing / planets on trade route
 * Getting transform infinity errors or NaN when attempting to set the planet position in force directed graph. Both occurred 50 times...
+    transform.position assign attempt for 'Planet(Clone)' is not valid. Input position is { NaN, NaN, NaN }.
+    UnityEngine.Transform:set_position(Vector3)
+    Galaxy:temperatureForcedDirectedGraph(Single) (at Assets/Scripts/System/Galaxy.cs:562)
+    Galaxy:createGalaxy(List`1) (at Assets/Scripts/System/Galaxy.cs:151)
+    Universe:Awake() (at Assets/Scripts/System/Universe.cs:46)
 
 Features
 ========
@@ -40,6 +45,7 @@ Features
 * Add HOME button to return to the center of the galaxy
 * Add increase of speed when moving mouse closer to the side of the screen
 * Refactor fleets within planets code away into separate class - too available, too many public methods
+    - Clean up galaxy code as well - too large
 * Prevent ships from being created when occupied by foreign ship (or immediately engage in combat?)
 * Add ownership concept - players not on the same team cannot move the ships that do not belong to them. 
 * Address TODO within codebase
