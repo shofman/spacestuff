@@ -18,8 +18,7 @@ Bugs
 * Adding a large amount of ships to the fleet display performs poorly (especially opening and closing) - possibly better to shift the entries over and hide them rather than deleting them
 * Sometimes planets will appear on-top of each other. Need to prevent that (add a minimum distance that planets need to span?)
 * Sometimes planets will spawn atop trade route, but doesn't find edge
-    - Delete galaxies that have edges crossing / planets on trade route
-* Getting transform infinity errors or NaN when attempting to set the planet position in force directed graph. Both occurred 50 times...
+* Getting transform infinity errors or NaN when attempting to set the planet position in force directed graph. Both occurred 50 times... (= to number of loops we run temp forced directed graph)
     transform.position assign attempt for 'Planet(Clone)' is not valid. Input position is { NaN, NaN, NaN }.
     UnityEngine.Transform:set_position(Vector3)
     Galaxy:temperatureForcedDirectedGraph(Single) (at Assets/Scripts/System/Galaxy.cs:562)
@@ -28,25 +27,32 @@ Bugs
 
 Features
 ========
+Important Features
+------------------
 * Fleets need to specify an allegiance - currently color, replace with allegiance class
-* Ability to cancel ship movement at end of turn (in case of enemy fleet appears)
-    - Possibly introduce undo?
 * Figure out how to deal with situation where two fleets are travelling together - need method of combining them together
 * Ability to select which fleet you want to move when there are multiple on the planet
+* Battles between differing allegiances - should be more advanced than just 'my number is greater than yours'
+* Limit camera view to only what is available (or wrap around)
+* Prevent ships from being created when occupied by foreign ship (or immediately engage in combat?)
+* Add ownership concept - players not on the same team cannot move the ships that do not belong to them. 
+* Add method of outputing the seeds for the current galaxy (so that it can be reproduced for debugging purposes)
+
+Nice to Have Features
+---------------------
 * Randomly generated textures on the planets - add different biomes
 * Different biomes need to have differing results on the planets
 * Unit tests
-* Battles between differing allegiances - should be more advanced than just 'my number is greater than yours'
 * Movements between galaxies
     - Should have multiple entry points for how close they are to relative galaxies ?
     - Add a random component for the amount of entry points between them
-* Move galaxies at random
-* Limit camera view to only what is available (or wrap around)
-* Add HOME button to return to the center of the galaxy
+* Ability to cancel ship movement at end of turn (in case of enemy fleet appears)
+    - Possibly introduce undo?
 * Add increase of speed when moving mouse closer to the side of the screen
 * Refactor fleets within planets code away into separate class - too available, too many public methods
     - Clean up galaxy code as well - too large
-* Prevent ships from being created when occupied by foreign ship (or immediately engage in combat?)
-* Add ownership concept - players not on the same team cannot move the ships that do not belong to them. 
 * Address TODO within codebase
-* Add bounding boxes around galaxies - ensure that they don't collide (possibly use force directed graphes on them)
+* Add force directed entry around galaxies to space them out (or just space them out in a nicer pattern)
+* With the prevention of edges, there are now multiple routes to a particular area. Maybe take into account enemy forces when moving
+* Add stars?
+* Handle when we generate an 'invalid' galaxy (currently defined by when there are still edges visible between trade routes)

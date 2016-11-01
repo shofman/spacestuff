@@ -503,7 +503,6 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
      * Then we do another galaxy bfs from that launcher to the target planet
      */
     private GameObject[] multiGalaxyMoveFleet(GameObject planetToMoveTo) {
-        GameObject[] planetsToMoveThrough = null;
         Galaxy currentGalaxy = galaxy.GetComponent<Galaxy>();
         // TODO - make the launchers a dynamic option (bfs each, and see whichever list is shorter)
         GameObject closestCurrentLauncher = currentGalaxy.getLaunchers()[0];

@@ -15,6 +15,8 @@ public class Universe : MonoBehaviour {
     GameObject universeUI;
     GameObject planetMenuDisplay;
 
+    private int galaxyIndex;
+
     void Awake() {
         // 5000 seems to be alright
         NameGenerator nameGenerator = new NameGenerator(numberOfGalaxies * 220);
@@ -43,10 +45,30 @@ public class Universe : MonoBehaviour {
                 galaxyNames.Add(availableNames.Dequeue());
             }
 
-            galaxyScript.createGalaxy(galaxyNames);
+            bool validGalaxy = galaxyScript.createGalaxy(galaxyNames);
+            if (!validGalaxy) {
+                Debug.Log("WE HAVE CREATED NOT A VALID GALAXY WITH " + galaxyScript.getName());
+            }
+
             // galaxyScript.createGalaxyUIElements(universeUI);
             listOfGalaxies[i,0] = galaxyCreated;
         }
+
+        // Ensure that the galaxies do not overlap with each other
+        for (int i=0; i<listOfGalaxies.GetLength(0); i++) {
+            for (int j=i+1; j<listOfGalaxies.GetLength(0); j++) {
+                Vector4 galaxyABoundingBox = listOfGalaxies[i,0].GetComponent<Galaxy>().getBoundingBox();
+                Vector4 galaxyBBoundingBox = listOfGalaxies[j,0].GetComponent<Galaxy>().getBoundingBox();
+                bool intersection = checkIfBoundingBoxesIntersect(galaxyABoundingBox, galaxyBBoundingBox);
+
+                if (intersection) {
+                    listOfGalaxies[j,0].transform.Translate(galaxyABoundingBox.y - galaxyBBoundingBox.x, galaxyABoundingBox.w -  galaxyBBoundingBox.z, 0);
+                    listOfGalaxies[j,0].GetComponent<Galaxy>().displayConnectedPlanets();
+                }
+            }
+        }
+
+        galaxyIndex = 0;
     }
 
     // Use this for initialization
@@ -75,6 +97,23 @@ public class Universe : MonoBehaviour {
                 listOfGalaxies[i,0].GetComponent<Galaxy>().findCrossingEdges();
             }
         }
+        if (Input.GetKeyDown("g")) {
+            galaxyIndex += 1;
+            galaxyIndex %= listOfGalaxies.GetLength(0);
+            GameObject currentGalaxy = listOfGalaxies[galaxyIndex, 0];
+            Debug.Log("Cycling to galaxy " + currentGalaxy.GetComponent<Galaxy>().getName());
+            Camera.main.transform.position = new Vector3(currentGalaxy.transform.position.x, currentGalaxy.transform.position.y, Camera.main.transform.position.z);
+        }
+    }
+
+    /**
+     * Returns whether two bounding boxes (represented by Vector4s) intersect
+     * The vector4s should be in the form of (xMin, xMax, yMin, yMax)
+     * if (RectA.Left < RectB.Right && RectA.Right > RectB.Left &&
+     RectA.Top < RectB.Bottom && RectA.Bottom > RectB.Top ) 
+     */
+    private bool checkIfBoundingBoxesIntersect(Vector4 rectA, Vector4 rectB) {
+        return (rectA.x < rectB.y && rectA.y > rectB.x && rectA.z < rectB.w && rectA.w > rectB.z);
     }
 
     /**

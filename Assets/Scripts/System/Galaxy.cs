@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System;
-
+using System.Linq;
 
 public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     // The planet object
@@ -67,7 +67,12 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
         launchersList = new List<GameObject>();
 
         planetRows = random.Next(2,7);
-        planetColumns = random.Next(2,7);
+        if (planetRows == 2) {
+            // Prevent boring random four planet galaxies
+            planetColumns = random.Next(3,7);
+        } else {
+            planetColumns = random.Next(2,7);
+        }
     }
 
 
@@ -78,7 +83,7 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
      *     * Creates random connected graph based on available nodes
      * @param newPlanetNames - List of randomly generated planet names
      */
-    public void createGalaxy(List<string> newPlanetNames) {
+    public bool createGalaxy(List<string> newPlanetNames) {
         planetNames = newPlanetNames;
 
         // Set galaxy name first, and remove it from list (no duplicates)
@@ -146,15 +151,61 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
             }
         }
         randomlyMovePlanets();
-        float distanceModifier = (float) random.Next(3,6);
+        float distanceModifier = calcDistanceModifier();
         for (int i=0; i<50; i++) {
             temperatureForcedDirectedGraph(distanceModifier);
         }
-        // TODO - check for edge crossings here - if so, delete object and return false
-        if (areEdgesCrossing()) {
-            Debug.Log("WE HAVE EDGES CROSSING IN " + getName());
-        }
+        bool valid = correctCrossingTradeRoutes();
         displayConnectedPlanets();
+        return valid;
+    }
+
+    /**
+     * Returns the distance modifier for the temperate force directed graph
+     */
+    private float calcDistanceModifier() {
+        float distanceModifier = (float) random.Next(3,6);
+        // If there are too many planets, we increase the number to avoid clumping 
+        if ((planetRows * planetColumns) > 28) {
+            distanceModifier = random.Next(5,8);
+        }
+        return distanceModifier;
+    }
+
+    /**
+     * Returns a Vector4 representing the four position extremes of the galaxy's planets (the space it will need to take up)
+     * x = xMin, y=xMax, z=yMin, w=yMax
+     */
+    public Vector4 getBoundingBox() {
+        float xMin = Single.PositiveInfinity;
+        float yMin = Single.PositiveInfinity;
+        float xMax = Single.NegativeInfinity;
+        float yMax = Single.NegativeInfinity;
+
+        List<GameObject> allPlanets = getListOfPlanets();
+        foreach (GameObject currentPlanet in allPlanets) {
+            Vector3 currentPos = currentPlanet.transform.position;
+            if (currentPos.x < xMin) {
+                xMin = currentPos.x;
+            }
+            if (currentPos.x > xMax) {
+                xMax = currentPos.x;
+            }
+            if (currentPos.y < yMin) {
+                yMin = currentPos.y;
+            }
+            if (currentPos.y > yMax) {
+                yMax = currentPos.y;
+            }
+        }
+
+        // Add padding to ensure no collisions
+        xMin -= 20;
+        yMin -= 20;
+        xMax += 20;
+        yMax += 20;
+
+        return new Vector4(xMin, xMax, yMin, yMax);
     }
 
     /**
@@ -321,11 +372,64 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
     }
 
     /**
-     * Returns whether there are edges crossing in this galaxy
+     * Removes crossing edges / trade routes within this galaxy by swapping out the cross
+     * @returns bool - whether or not we have successfully removed all crossing trade routes
      */
-    public bool areEdgesCrossing() {
-        List<PlanetLine> crossingEdges = findCrossingEdges(true);
-        return crossingEdges.Count > 0;
+    public bool correctCrossingTradeRoutes() {
+        List<PlanetLine> crossingEdges = findCrossingEdges();
+        if (crossingEdges.Count > 0) {
+            // Crossing edges are always added in pairs - the intersection should be the first element followed by the second
+            removeCrossingEdges(crossingEdges);
+
+            // Find if there are still remaining
+            crossingEdges = findCrossingEdges();
+            if (crossingEdges.Count > 0) {
+                removeCrossingEdges(crossingEdges);
+                crossingEdges = findCrossingEdges();
+                if (crossingEdges.Count > 0) {
+                    // Third time - indicate failure
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void removeCrossingEdges(List<PlanetLine> crossings) {
+        for (int i=0; i<crossings.Count; i+=2) {
+            if (crossings.ElementAtOrDefault(i) != null && crossings.ElementAtOrDefault(i+1) != null) {
+                PlanetLine firstLine = crossings.ElementAtOrDefault(i);
+                PlanetLine secondLine = crossings.ElementAtOrDefault(i+1);
+
+                /**
+                  crossing edges look like this      fixed result should look like this
+                            a                                         a
+                            |                                       /   \
+                        x ---- y                                   x     y
+                            |                                       \   /
+                            b                                         b
+                 */
+                GameObject xPlanet = firstLine.firstPlanet;
+                GameObject yPlanet = firstLine.secondPlanet;
+
+                GameObject aPlanet = secondLine.firstPlanet;
+                GameObject bPlanet = secondLine.secondPlanet;
+
+                // Remove the crossing edges by destroying the trade routes between the planets
+                xPlanet.GetComponent<Planet>().removeConnectedPlanet(yPlanet);
+                yPlanet.GetComponent<Planet>().removeConnectedPlanet(xPlanet);
+
+                aPlanet.GetComponent<Planet>().removeConnectedPlanet(bPlanet);
+                bPlanet.GetComponent<Planet>().removeConnectedPlanet(aPlanet);
+                
+                // Connect the planet to the previously conflicting trade route planets
+                addPlanet(xPlanet, aPlanet);
+                addPlanet(xPlanet, bPlanet);
+
+                addPlanet(yPlanet, aPlanet);
+                addPlanet(yPlanet, bPlanet);
+            }
+        }
     }
 
     /**
@@ -348,8 +452,8 @@ public class Galaxy : MonoBehaviour, IBreadthFirstSearchInterface {
         foreach (PlanetLine firstLine in allTradeRoutes) {
             foreach (PlanetLine secondLine in allTradeRoutes) {
                 if (!firstLine.containsSamePoint(secondLine) && !intersectionAlreadyFound(firstLine, secondLine, intersectionLines)) {
-                    bool otherIntersection = lineIntersects(firstLine.planetOne, firstLine.planetTwo, secondLine.planetOne, secondLine.planetTwo);
-                    if (otherIntersection) {
+                    bool isIntersection = lineIntersects(firstLine.planetOne, firstLine.planetTwo, secondLine.planetOne, secondLine.planetTwo);
+                    if (isIntersection) {
                         intersectionLines.Add(firstLine);
                         intersectionLines.Add(secondLine);
                         if (logOutPlanets) {
