@@ -106,7 +106,15 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
         if (isTransferingAFleet) {
             // Take the fleet at the currently selected planet, and move it to this planet
             GameObject currentlySelectedPlanet = shipDisplay.GetComponent<Display>().getPlanet();
-            currentlySelectedPlanet.GetComponent<Planet>().moveFleet(gameObject);
+            ShipDisplay shipScript = shipDisplay.GetComponent<ShipDisplay>();
+            GameObject chosenFleet = shipScript.getChosenFleet();
+            if (chosenFleet != null) {
+                currentlySelectedPlanet.GetComponent<Planet>().moveFleet(gameObject, chosenFleet);
+                shipScript.clearChosenFleet();
+            } else {
+                currentlySelectedPlanet.GetComponent<Planet>().moveFleet(gameObject);
+            }
+
         } else {
             activatePlanetMenu();
         }
@@ -417,6 +425,12 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
         }
     }
 
+    public GameObject getFleetOverPlanet(GameObject fleetToRetrieve) {
+        int fleetId = fleetToRetrieve.GetInstanceID();
+        GameObject fleetFound = fleetOverPlanet.SingleOrDefault(x => x.GetInstanceID() == fleetId);
+        return fleetFound;
+    }
+
     /**
      * Temp object to assist in adding functionality for multiple fleets
      */
@@ -491,6 +505,24 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
             // TODO - make this not always the first entry
             removeFleet(0);
             
+            if (fleet != null && planetsToMoveThrough != null) {
+                fleet.GetComponent<Fleet>().moveFleet(planetsToMoveThrough);
+            }
+        }
+    }
+
+    public void moveFleet(GameObject planetToMoveTo, GameObject fleetToMove) {
+        if (planetToMoveTo.GetInstanceID() != this.gameObject.GetInstanceID()) {
+            GameObject fleet = getFleetOverPlanet(fleetToMove);
+            GameObject[] planetsToMoveThrough = null;
+            if (isPlanetInSameGalaxy(planetToMoveTo)) {
+                planetsToMoveThrough = galaxy.GetComponent<Galaxy>().bfsGalaxy(this.gameObject, planetToMoveTo);
+            } else {
+                planetsToMoveThrough = multiGalaxyMoveFleet(planetToMoveTo);
+            }
+
+            removeFleet(fleetToMove);
+
             if (fleet != null && planetsToMoveThrough != null) {
                 fleet.GetComponent<Fleet>().moveFleet(planetsToMoveThrough);
             }

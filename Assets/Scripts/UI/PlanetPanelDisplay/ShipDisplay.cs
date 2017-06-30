@@ -8,16 +8,20 @@ public class ShipDisplay : Display {
     public GameObject moveShipButton;
     public GameObject shipDisplayScrollbar;
 
+    public GameObject mouse;
+
     // Fleet and ship display objects
     public GameObject fleetHolder;
     public GameObject fleetNameDisplay;
     public GameObject shipNameDisplay;
 
     private bool showingShipScrollbar;
+    private GameObject chosenFleet;
 
     void Awake() {
         shipDisplayScrollbar.SetActive(false);
         showingShipScrollbar = false;
+        chosenFleet = null;
     }
 
     /**
@@ -66,6 +70,47 @@ public class ShipDisplay : Display {
                 deactivateShipDisplay();
             }
         }
+    }
+
+    /**
+     * Setups up the mouse display to show 
+     */
+    public void moveShips() {
+        if (areMultipleFleetsOverPlanet()) {
+            toggleDisplayShipsOnPlanet(true);
+            Debug.Log("Which fleet?");
+        } else {
+            toggleMouseForShipMovement();
+        }
+    }
+
+    /**
+     * Toggles the mouse into a targeting reticule
+     */
+    public void toggleMouseForShipMovement() {
+        disablePlanetOverviewMenu();
+        mouse.GetComponent<TargetMouseTexture>().toggleTargetedMouse();
+    }
+
+    /**
+     * Sets the chosen fleet for moving (in the case of multiple)
+     */
+    public void setChosenFleet(GameObject fleet) {
+        chosenFleet = fleet;
+    }
+
+    /**
+     * Clears out chosen fleet after use
+     */
+    public void clearChosenFleet() {
+        chosenFleet = null;
+    }
+
+    /**
+     * Retrieves the chosen fleet from the display
+     */
+    public GameObject getChosenFleet() {
+        return chosenFleet;
     }
 
     /**
@@ -142,6 +187,7 @@ public class ShipDisplay : Display {
         GameObject fleetDisplay = (GameObject) Instantiate (fleetNameDisplay);
         setUIParent(fleetDisplay, fleetHolder);
         fleetDisplay.GetComponent<Text>().text = "Fleet " + fleetIndex;
+        fleetDisplay.GetComponent<FleetInteractions>().setParentDisplay(gameObject, fleet);
 
         // Attach list of ships to fleet display
         List<GameObject> ships = fleet.GetComponent<Fleet>().listShipsInFleet();

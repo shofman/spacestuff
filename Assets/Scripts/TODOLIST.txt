@@ -24,6 +24,7 @@ Bugs
     Galaxy:temperatureForcedDirectedGraph(Single) (at Assets/Scripts/System/Galaxy.cs:562)
     Galaxy:createGalaxy(List`1) (at Assets/Scripts/System/Galaxy.cs:151)
     Universe:Awake() (at Assets/Scripts/System/Universe.cs:46)
+* Third time moving units with the drag/drop feature prevent them from moving...or even existing
 
 Features
 ========
@@ -31,8 +32,8 @@ Important Features
 ------------------
 * Fleets need to specify an allegiance - currently color, replace with allegiance class
 * Figure out how to deal with situation where two fleets are travelling together - need method of combining them together
-* Ability to select which fleet you want to move when there are multiple on the planet
-* Battles between differing allegiances - should be more advanced than just 'my number is greater than yours'
+* Ability to select which fleet you want to move when there are multiple on the planet - In progress
+* Battles between differing allegiances - simulation should be more advanced than just 'my number is greater than yours'
 * Limit camera view to only what is available (or wrap around)
 * Prevent ships from being created when occupied by foreign ship (or immediately engage in combat?)
 * Add ownership concept - players not on the same team cannot move the ships that do not belong to them. 

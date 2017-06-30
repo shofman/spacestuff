@@ -5,12 +5,10 @@ using UnityEngine;
  */
 public class CameraMovement : MonoBehaviour {
     public float dragSpeedXY = 5;
-    private Vector3 dragOrigin;
 
     const int zoomSizeMin = 13;
     const int zoomSizeMax = 130;
 
-    public int boundary = 100; // distance from edge scrolling starts
     private int screenWidth;
     private int screenHeight;
 
