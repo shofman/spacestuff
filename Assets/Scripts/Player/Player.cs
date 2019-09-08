@@ -41,4 +41,9 @@ public class Player : MonoBehaviour {
         }
         return amount;
     }
+
+    public virtual int TurnOrder
+    {
+        get { return -1; }
+    }
 }

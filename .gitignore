@@ -17,6 +17,7 @@ ExportedObj/
 *.pidb
 *.booproj
 *.svd
+*.DS_Store
 
 *.pidb.meta
 sysinfo.txt

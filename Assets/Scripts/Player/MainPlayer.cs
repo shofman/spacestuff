@@ -24,4 +24,8 @@ public class MainPlayer : Player {
         base.spendMoney(moneyToSpend);
         resources.setPlayerDisplay(wealth);
     }
+
+    public override int TurnOrder {
+        get { return 3; }
+    }
 }
