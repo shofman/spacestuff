@@ -29,9 +29,11 @@ public class ShipDisplay : Display {
      */
     public void createShipFromButton() {
         if (getPlanet() != null) {
-            getPlanet().GetComponent<PlanetProduction>().createShip();
-            validateMoveShipButton();
-            updateShipListingForPlanet();
+            bool hasCreatedShip = getPlanet().GetComponent<PlanetProduction>().createShip();
+            if (hasCreatedShip) {
+                validateMoveShipButton();
+                updateShipListingForPlanet();
+            }
         }
     }
 

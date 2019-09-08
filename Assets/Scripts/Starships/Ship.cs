@@ -17,7 +17,7 @@ public class Ship : MonoBehaviour {
 
     }
 
-    void Start() {
+    protected virtual void Start() {
 
     }
 
@@ -76,5 +76,13 @@ public class Ship : MonoBehaviour {
      */
     public int getDistance() {
         return distance;
+    }
+
+    /**
+     * Returns the cost to build the ship
+     */
+    public virtual int Cost
+    {
+        get { return 100; }
     }
 }

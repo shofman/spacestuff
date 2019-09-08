@@ -8,25 +8,32 @@ public class Player : MonoBehaviour {
 
     public GameObject universe;
 
-    public GameObject resourceDisplay;
-
-    private ResourceDisplay resources;
-
-    void Awake() {
-        allegiance = Color.blue;
-        resources = resourceDisplay.GetComponent<ResourceDisplay>();
-    }
-
     void Start() {
         wealth = calculateWealth();
-        resources.setPlayerDisplay(wealth);
+        Debug.Log("wealth" + wealth);
     }
 
-    void Update() {
+    void Update() {}
 
+    public virtual void spendMoney(int moneyToSpend) {
+        wealth -= moneyToSpend;
+
+        if (wealth < 0) {
+            Debug.Log("WE SHOULD NOT BE HERE - WEALTH WAS REDUCED BELOW ZERO");
+            // Should
+            wealth = 0;
+        }
     }
 
-    private int calculateWealth() {
+    public int getWealth() {
+        return wealth;
+    }
+
+    public Color getAllegiance() {
+        return allegiance;
+    }
+
+    protected int calculateWealth() {
         List<GameObject> playersPlanets = universe.GetComponent<Universe>().findAllPlanetsBelongingTo(allegiance);
         int amount = 0;
         foreach (GameObject planet in playersPlanets) {
