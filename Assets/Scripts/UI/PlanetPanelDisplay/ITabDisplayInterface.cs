@@ -6,5 +6,4 @@ using System;
 public interface ITabDisplayInterface {
 	void enableDisplay();
 	void disableDisplay();
-	void setPlanet(GameObject planet);
 }

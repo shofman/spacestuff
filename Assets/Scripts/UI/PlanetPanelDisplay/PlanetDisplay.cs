@@ -8,11 +8,12 @@ public class PlanetDisplay : Display {
 
 	Text txt;
 
-	void Awake() {
-		txt = planetName.GetComponent<Text>();
+	protected override void Awake() {
+    base.Awake();
+    txt = planetName.GetComponent<Text>();
 	}
 
 	public void setName(string name) {
-		txt.text = "Planet Name: " + name;
+    txt.text = "Planet Name: " + name;
 	}
 }

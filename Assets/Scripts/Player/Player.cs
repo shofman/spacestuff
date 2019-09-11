@@ -8,9 +8,11 @@ public class Player : MonoBehaviour {
 
     public GameObject universe;
 
-    void Start() {
+    private CommandManager commandManager;
+
+    protected virtual void Start() {
         wealth = calculateWealth();
-        Debug.Log("wealth" + wealth);
+        commandManager = new CommandManager();
     }
 
     void Update() {}
@@ -27,6 +29,14 @@ public class Player : MonoBehaviour {
 
     public int getWealth() {
         return wealth;
+    }
+
+    public void addCommand(ICommand newCommand) {
+        commandManager.addCommand(newCommand);
+    }
+
+    public void processUnfinishedCommands() {
+        commandManager.processCommands();
     }
 
     public Color getAllegiance() {

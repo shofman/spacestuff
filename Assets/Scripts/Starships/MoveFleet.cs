@@ -4,7 +4,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-public class MoveFleet : MonoBehaviour {
+public class MoveFleet : MonoBehaviour, PlanetObserver {
+    public GameObject player;
+    public GameObject shipDisplay;
+
+    private GameObject currentlySelectedPlanet;
+
+    void Awake() {
+        PlanetChangeNotifier.instance().addObserver(this);
+    }
+
     /**
      * Called on each game loop
      * We use it to detect mouse clicks when moving a 
@@ -16,10 +25,35 @@ public class MoveFleet : MonoBehaviour {
             if (!(hit.point.x == 0 &&
                 hit.point.y == 0 &&
                 hit.point.z == 0)) {
-
                 //If we hit a planet, we send the fleet there
-                if (hit.transform.gameObject.tag == "Planet") {
-                    hit.transform.gameObject.GetComponent<Planet>().setTransferingFleet(true);
+                GameObject hitObject = hit.transform.gameObject;
+                if (hitObject.tag == "Planet" && currentlySelectedPlanet != null) {
+                    // Take the fleet at the currently selected planet, and move it to this planet
+                    ShipDisplay shipScript = shipDisplay.GetComponent<ShipDisplay>();
+                    GameObject chosenFleet = shipScript.getChosenFleet();
+                    MoveShipsCommand moveShips;
+                    if (chosenFleet != null) {
+                        shipScript.clearChosenFleet();
+
+                        moveShips = new MoveShipsCommand(
+                            chosenFleet,
+                            currentlySelectedPlanet,
+                            hitObject,
+                            player
+                        );
+                    } else {
+                        // TODO - Figure out how to handle selecting which fleet to go
+                        GameObject currentFleet = currentlySelectedPlanet.GetComponent<Planet>().getFleetOverPlanet();
+                        moveShips = new MoveShipsCommand(
+                            chosenFleet,
+                            currentlySelectedPlanet,
+                            hitObject,
+                            player
+                        );
+                    }
+                    Player p = player.GetComponent<Player>();
+                    p.addCommand(moveShips);
+                    hitObject.GetComponent<Planet>().setTransferingFleet(true); // Don't show the player menu
                 }
             }
 
@@ -60,5 +94,12 @@ public class MoveFleet : MonoBehaviour {
         // Casts the ray and get the first game object hit
         Physics.Raycast(ray, out hit);
         return hit;
+    }
+
+    /**
+     * Triggers when the displayed planet is changed
+     */ 
+    public void onPlanetChange(GameObject newPlanet) {
+        currentlySelectedPlanet = newPlanet;
     }
 }

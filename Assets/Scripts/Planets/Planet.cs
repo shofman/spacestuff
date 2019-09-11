@@ -103,19 +103,7 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
      * @param eventData - Information about the event that we don't really care currently about
      */
     public void OnPointerClick(PointerEventData eventData) {
-        if (isTransferingAFleet) {
-            // Take the fleet at the currently selected planet, and move it to this planet
-            GameObject currentlySelectedPlanet = shipDisplay.GetComponent<Display>().getPlanet();
-            ShipDisplay shipScript = shipDisplay.GetComponent<ShipDisplay>();
-            GameObject chosenFleet = shipScript.getChosenFleet();
-            if (chosenFleet != null) {
-                currentlySelectedPlanet.GetComponent<Planet>().moveFleet(gameObject, chosenFleet);
-                shipScript.clearChosenFleet();
-            } else {
-                currentlySelectedPlanet.GetComponent<Planet>().moveFleet(gameObject);
-            }
-
-        } else {
+        if (!isTransferingAFleet) {
             activatePlanetMenu();
         }
         isTransferingAFleet = false;
@@ -141,11 +129,7 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
      */
     private void activatePlanetMenu() {
         // Initialize the planet for the displays
-        shipDisplay.GetComponent<Display>().setPlanet(gameObject);
-        troopDisplay.GetComponent<Display>().setPlanet(gameObject);
-        peopleDisplay.GetComponent<Display>().setPlanet(gameObject);
-        productionDisplay.GetComponent<Display>().setPlanet(gameObject);
-        planetDisplay.GetComponent<Display>().setPlanet(gameObject);
+        PlanetChangeNotifier.instance().notify(gameObject);
 
         // If the menu is closed, open it and show the currently selected tab
         tabManager.GetComponent<TabManager>().enableDisplayOnOpen();

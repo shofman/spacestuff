@@ -6,23 +6,16 @@ using System.Collections.Generic;
 /**
  * Generic class holding the logic shared between display panels on the planet menu
  */
-public class Display : MonoBehaviour, ITabDisplayInterface {
+public class Display : MonoBehaviour, ITabDisplayInterface, PlanetObserver {
     public GameObject planetPanel;
     /**
      * The planet we are currently viewing
      */
     GameObject planetToDisplay;
 
-    void Awake() {
+    protected virtual void Awake() {
         planetToDisplay = null;
-    }
-
-    /**
-     * Sets the planet for the menu to display
-     * @param {[type]} GameObject planet The planet we want to display
-     */
-    public void setPlanet(GameObject planet) {
-        planetToDisplay = planet;
+        PlanetChangeNotifier.instance().addObserver(this);
     }
 
     /**
@@ -56,5 +49,12 @@ public class Display : MonoBehaviour, ITabDisplayInterface {
         if (planet != null) {
             planet.GetComponent<Planet>().deactivatePlanetMenu();
         }
+    }
+
+    /**
+    * Triggered when the selected planet changes
+    */
+    public void onPlanetChange(GameObject newPlanet) {
+        planetToDisplay = newPlanet;
     }
 }

@@ -26,6 +26,11 @@ public class TurnDisplay : MonoBehaviour, Observer {
 		updatePlayerColor();
 	}
 
+	private void triggerPlayerCommands() {
+		Player player = currentPlayer.GetComponent<Player>();
+		player.processUnfinishedCommands();
+	}
+
 	/**
 	 * Increments the turn count 
 	 */
@@ -55,6 +60,8 @@ public class TurnDisplay : MonoBehaviour, Observer {
 	 * Implemented as part of Observer, is called when end of turn happens
 	 */
 	public void onNotify() {
-	    changePlayer();
+    // Note - triggerPlayerCommands must come before changePlayer is called
+    triggerPlayerCommands();
+    changePlayer();
 	}
 }

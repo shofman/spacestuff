@@ -18,7 +18,8 @@ public class ShipDisplay : Display {
     private bool showingShipScrollbar;
     private GameObject chosenFleet;
 
-    void Awake() {
+    protected override void Awake() {
+        base.Awake();
         shipDisplayScrollbar.SetActive(false);
         showingShipScrollbar = false;
         chosenFleet = null;

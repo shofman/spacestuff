@@ -11,9 +11,9 @@ public class MainPlayer : Player {
         resources = resourceDisplay.GetComponent<ResourceDisplay>();
     }
 
-    void Start() {
-        wealth = calculateWealth();
-        resources.setPlayerDisplay(wealth);
+    protected override void Start() {
+        base.Start();
+        resources.setPlayerDisplay(base.wealth);
     }
 
     void Update() {
@@ -26,6 +26,6 @@ public class MainPlayer : Player {
     }
 
     public override int TurnOrder {
-        get { return 3; }
+        get { return 1; }
     }
 }
