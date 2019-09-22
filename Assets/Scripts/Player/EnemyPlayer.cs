@@ -10,4 +10,8 @@ public class EnemyPlayer : Player {
     public override int TurnOrder {
         get { return 2; }
     }
+
+    public override string PlayerName {
+        get { return "AI-MAN"; }
+    }
 }

@@ -78,6 +78,14 @@ public class Ship : MonoBehaviour {
         return distance;
     }
 
+    public void setInTransit(bool inTransit) {
+        if (inTransit) {
+            GetComponent<Renderer>().material.SetColor("_Color", Color.gray);
+        } else {
+            GetComponent<Renderer>().material.SetColor("_Color", allegiance);
+        }
+    }
+
     /**
      * Returns the cost to build the ship
      */

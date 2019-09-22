@@ -23,7 +23,7 @@ public class UpdateTurnSpeed : MonoBehaviour
       ht.Add(0, new TimeDisplay("||", 0));
       ht.Add(1, new TimeDisplay(">", 1));
       ht.Add(2, new TimeDisplay(">>", 5));
-      ht.Add(3, new TimeDisplay(">>>", 50));
+      ht.Add(3, new TimeDisplay(">>>", 25));
     }
 
     public void updateSpeed(Slider speedSlider) {

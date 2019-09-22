@@ -10,6 +10,9 @@ public class Player : MonoBehaviour {
 
     private CommandManager commandManager;
 
+    // protected void Awake() {
+    // }
+
     protected virtual void Start() {
         wealth = calculateWealth();
         commandManager = new CommandManager();
@@ -32,11 +35,15 @@ public class Player : MonoBehaviour {
     }
 
     public void addCommand(ICommand newCommand) {
-        commandManager.addCommand(newCommand);
+        if (commandManager != null) {
+            commandManager.addCommand(newCommand);
+        }
     }
 
     public void processUnfinishedCommands() {
-        commandManager.processCommands();
+        if (commandManager != null) {
+            commandManager.processCommands();
+        }
     }
 
     public Color getAllegiance() {
@@ -55,5 +62,9 @@ public class Player : MonoBehaviour {
     public virtual int TurnOrder
     {
         get { return -1; }
+    }
+
+    public virtual string PlayerName {
+        get { return ""; }
     }
 }

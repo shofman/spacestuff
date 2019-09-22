@@ -57,8 +57,3 @@ Nice to Have Features
 * With the prevention of edges, there are now multiple routes to a particular area. Maybe take into account enemy forces when moving
 * Add stars?
 * Handle when we generate an 'invalid' galaxy (currently defined by when there are still edges visible between trade routes)
-
-
-TODO
-====
-Space Combat - Taken from Flight Test - Entire Art directory needs to be revamped to be your own.

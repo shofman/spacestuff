@@ -474,8 +474,6 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     public bool isBlockaded() {
         GameObject fleet = getFleetOverPlanet();
         if (fleet != null) {
-            Debug.Log("fleet" + fleet.GetComponent<Fleet>().getAllegiance());
-            Debug.Log("planet" + getAllegiance());
             return getAllegiance() == fleet.GetComponent<Fleet>().getAllegiance();
         }
 
@@ -490,17 +488,11 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     public void moveFleet(GameObject planetToMoveTo) {
         if (planetToMoveTo.GetInstanceID() != this.gameObject.GetInstanceID()) {
             GameObject fleet = getFleetOverPlanet();
-            GameObject[] planetsToMoveThrough = null;
-            if (isPlanetInSameGalaxy(planetToMoveTo)) {
-                planetsToMoveThrough = galaxy.GetComponent<Galaxy>().bfsGalaxy(this.gameObject, planetToMoveTo);
-            } else {
-                planetsToMoveThrough = multiGalaxyMoveFleet(planetToMoveTo);
-            }
-            
-            // TODO - make this not always the first entry
-            removeFleet(0);
+            GameObject[] planetsToMoveThrough = getPlanetsToMoveThrough(planetToMoveTo);
             
             if (fleet != null && planetsToMoveThrough != null) {
+                // TODO - make this not always the first entry
+                removeFleet(0);
                 fleet.GetComponent<Fleet>().moveFleet(planetsToMoveThrough);
             }
         }
@@ -509,19 +501,23 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     public void moveFleet(GameObject planetToMoveTo, GameObject fleetToMove) {
         if (planetToMoveTo.GetInstanceID() != this.gameObject.GetInstanceID()) {
             GameObject fleet = getFleetOverPlanet(fleetToMove);
-            GameObject[] planetsToMoveThrough = null;
-            if (isPlanetInSameGalaxy(planetToMoveTo)) {
-                planetsToMoveThrough = galaxy.GetComponent<Galaxy>().bfsGalaxy(this.gameObject, planetToMoveTo);
-            } else {
-                planetsToMoveThrough = multiGalaxyMoveFleet(planetToMoveTo);
-            }
-
-            removeFleet(fleetToMove);
+            GameObject[] planetsToMoveThrough = getPlanetsToMoveThrough(planetToMoveTo);
 
             if (fleet != null && planetsToMoveThrough != null) {
+                removeFleet(fleetToMove);
                 fleet.GetComponent<Fleet>().moveFleet(planetsToMoveThrough);
             }
         }
+    }
+
+    public GameObject[] getPlanetsToMoveThrough(GameObject destinationPlanet) {
+        GameObject[] planetsToMoveThrough = null;
+        if (isPlanetInSameGalaxy(destinationPlanet)) {
+            planetsToMoveThrough = galaxy.GetComponent<Galaxy>().bfsGalaxy(this.gameObject, destinationPlanet);
+        } else {
+            planetsToMoveThrough = multiGalaxyMoveFleet(destinationPlanet);
+        }
+        return planetsToMoveThrough;
     }
 
     /**
@@ -555,6 +551,9 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
         // we need to add the target galaxy launcher planet to our list of movements
         GameObject[] targetLauncher = new GameObject[] { closestTargetLauncher };
         GameObject[] fullMovement = currentGalaxyMovementList.Concat(targetLauncher).Concat(targetGalaxyMovementList).ToArray();
+        foreach (GameObject go in fullMovement) {
+            Debug.Log("Planet visit " + go.GetComponent<Planet>().getName());
+        }
         return fullMovement;
     }
 

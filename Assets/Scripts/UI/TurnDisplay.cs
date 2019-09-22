@@ -8,7 +8,6 @@ public class TurnDisplay : MonoBehaviour, ChangePlayerObserver {
 	public GameObject PlayerTurnDisplay;
 
 	Text txt;
-	int turnCount = 0;
 
 	float baseTimeInTurn = 36;
 	int speedModifier = 1; // Can adjust this if we want to decouple the Time.timeScale to avoid having animations look poor
@@ -16,7 +15,7 @@ public class TurnDisplay : MonoBehaviour, ChangePlayerObserver {
 
 	void Awake() {
 		currentTurnTime = baseTimeInTurn;
-		// EndTurnNotifier.instance().addEndTurnObserver(this);
+
 		CurrentPlayer.instance().addPlayerChangeObserver(this);
 		txt = gameObject.GetComponent<Text>();
 		updateCount();
@@ -26,9 +25,8 @@ public class TurnDisplay : MonoBehaviour, ChangePlayerObserver {
 		    
   void Update() {
       currentTurnTime -= Time.deltaTime * 1;
-      Debug.Log("current" + currentTurnTime);
-      if(currentTurnTime < 0)
-      {
+      if(currentTurnTime < 0) {
+		      EndTurnNotifier.instance().notify();
           updateCount();
           currentTurnTime = baseTimeInTurn;
       }
@@ -38,22 +36,19 @@ public class TurnDisplay : MonoBehaviour, ChangePlayerObserver {
 	 * Increments the turn count 
 	 */
 	private void updateCount() {
-		turnCount++;
-		txt.text = "Turn: " + turnCount;
+		txt.text = "Turn: " + EndTurnNotifier.instance().getCurrentTurnCount();
 	}
 
 	private void updatePlayerColor() {
 		ChangePlayerDisplay changeDisplay = PlayerTurnDisplay.GetComponent<ChangePlayerDisplay>();
-		changeDisplay.setAllegianceColor(CurrentPlayer.instance().getCurrentPlayer().getAllegiance());
+    Player p = CurrentPlayer.instance().getCurrentPlayer();
+		changeDisplay.setAllegianceColor(p.getAllegiance());
 	}
 
 	public void changeTurnSpeed(Slider speedSlider) {
 		speedModifier = (int) speedSlider.value;
 	}
 
-	/**
-	 * Implemented as part of EndTurnObserver, is called when end of turn happens
-	 */
 	public void onChangePlayerNotify() {
     updatePlayerColor();
 	}

@@ -35,6 +35,7 @@ public class CurrentPlayer : EndTurnObserver
     private CurrentPlayer() {
         EndTurnNotifier.instance().addEndTurnObserver(this);
         listOfPlayers = GameObject.FindGameObjectsWithTag("Player").OrderBy(gameObject => gameObject.GetComponent<Player>().TurnOrder).ToArray();
+
         currentPlayer = listOfPlayers[0];
     }
 
@@ -63,8 +64,10 @@ public class CurrentPlayer : EndTurnObserver
     }
 
     private void triggerPlayerCommandsBeforeSwitching() {
-        Player player = currentPlayer.GetComponent<Player>();
-        player.processUnfinishedCommands();
+        foreach (GameObject player in listOfPlayers) {
+            Player playerScript = player.GetComponent<Player>();
+            playerScript.processUnfinishedCommands();
+        }
     }
 
     public void onEndTurnNotify() {

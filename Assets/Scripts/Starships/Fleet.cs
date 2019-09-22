@@ -104,6 +104,30 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
     }
 
     /**
+     * Teleports the fleet to its destination through space (calculating the intended travel time)
+     */
+    public int getFleetArrivalTime(GameObject[] listOfPlanets) {
+        int costToMoveThroughFriendlyPlanets = 1;
+        int costToMoveThroughEnemyPlanets = 2;
+
+        planets = listOfPlanets.ToList();
+
+        int arrivalTime = EndTurnNotifier.instance().getCurrentTurnCount();
+        // TODO - make this calculation take into account enemy planets and speed of items in fleet
+        Color fleetAllegiance = getAllegiance();
+        foreach (GameObject go in listOfPlanets) {
+            if (go.GetComponent<Planet>().getAllegiance() == fleetAllegiance) {
+                arrivalTime += costToMoveThroughFriendlyPlanets;
+            } else {
+                arrivalTime += costToMoveThroughEnemyPlanets;
+            }
+        }
+        return arrivalTime;
+        // }
+        // return 
+    }
+
+    /**
      * Removes the fleet from any associated planets, and destroys the game object 
      */
     public void destroyFleet() {
@@ -119,6 +143,24 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
     public void landOnPlanet() {
         orbitPlanet(newMovementTarget);
         newMovementTarget.GetComponent<Planet>().setFleet(this.gameObject);
+    }
+
+    public void teleportToPlanet(GameObject newPlanet) {
+        orbitPlanet(newPlanet);
+        newPlanet.GetComponent<Planet>().setFleet(this.gameObject);
+        setInTransit();
+    }
+
+    public void setInTransit() {
+        foreach (GameObject ship in shipsInFleet) {
+            ship.GetComponent<Ship>().setInTransit(true);
+        }
+    }
+
+    public void setFinishedTransit() {
+        foreach (GameObject ship in shipsInFleet) {
+            ship.GetComponent<Ship>().setInTransit(false);
+        }
     }
 
     /**

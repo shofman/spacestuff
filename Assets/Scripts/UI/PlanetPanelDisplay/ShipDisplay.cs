@@ -226,7 +226,13 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver {
     private void updatePlanetDisplay() {
         currentPlayer = CurrentPlayer.instance().getCurrentPlayer();
 
-        Planet currentPlanet = getPlanet().GetComponent<Planet>();
+        GameObject possiblePlanet = getPlanet();
+
+        if (possiblePlanet == null) {
+            return;
+        }
+
+        Planet currentPlanet = possiblePlanet.GetComponent<Planet>();
 
         bool isPlayerOwned = currentPlayer.getAllegiance() == currentPlanet.getAllegiance();
         bool isBlockaded = currentPlanet.isBlockaded();
@@ -236,7 +242,12 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver {
             moveShipButton.SetActive(true);
         } else {
             createShipButton.SetActive(false);
-            moveShipButton.SetActive(false);
+
+            if (isBlockaded && !isPlayerOwned) { // We are blockading an enemy planet - we can still move
+                moveShipButton.SetActive(true);
+            } else {
+                moveShipButton.SetActive(false);
+            }
         }
     }
 

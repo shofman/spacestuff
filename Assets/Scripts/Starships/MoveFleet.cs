@@ -45,7 +45,7 @@ public class MoveFleet : MonoBehaviour, PlanetObserver {
                         // TODO - Figure out how to handle selecting which fleet to go
                         GameObject currentFleet = currentlySelectedPlanet.GetComponent<Planet>().getFleetOverPlanet();
                         moveShips = new MoveShipsCommand(
-                            chosenFleet,
+                            currentFleet,
                             currentlySelectedPlanet,
                             hitObject,
                             player

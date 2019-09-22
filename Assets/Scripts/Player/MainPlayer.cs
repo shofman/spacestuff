@@ -28,4 +28,8 @@ public class MainPlayer : Player {
     public override int TurnOrder {
         get { return 1; }
     }
+
+    public override string PlayerName {
+        get { return "MainPlayer"; }
+    }
 }

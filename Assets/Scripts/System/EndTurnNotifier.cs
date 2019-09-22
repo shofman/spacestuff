@@ -10,6 +10,8 @@ public class EndTurnNotifier
      */
     private static EndTurnNotifier _instance;
 
+    int currentTurnCount = 0;
+
     /**
      * A list with observers that are waiting for something to happen
      */
@@ -29,12 +31,17 @@ public class EndTurnNotifier
      * Constructor - set to private to prevent accidental use
      */
     private EndTurnNotifier() {
+        currentTurnCount++;
+    }
 
+    public int getCurrentTurnCount() {
+        return currentTurnCount;
     }
 
     //Send notifications if something has happened
     public void notify()
     {
+        currentTurnCount++;
         for (int i = 0; i < observers.Count; i++)
         {
             //Notify all observers even though some may not be interested in what has happened
