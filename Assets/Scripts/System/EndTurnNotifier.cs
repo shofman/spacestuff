@@ -13,7 +13,7 @@ public class EndTurnNotifier
     /**
      * A list with observers that are waiting for something to happen
      */
-    List<Observer> observers = new List<Observer>();
+    List<EndTurnObserver> observers = new List<EndTurnObserver>();
 
     /**
      * Statically access the end of turn notifier
@@ -39,18 +39,18 @@ public class EndTurnNotifier
         {
             //Notify all observers even though some may not be interested in what has happened
             //Each observer should check if it is interested in this event
-            observers[i].onNotify();
+            observers[i].onEndTurnNotify();
         }
     }
 
     //Add observer to the list
-    public void addObserver(Observer observer)
+    public void addEndTurnObserver(EndTurnObserver observer)
     {
         observers.Add(observer);
     }
 
     //Remove observer from the list
-    public void removeObserver(Observer observer)
+    public void removeObserver(EndTurnObserver observer)
     {
         Debug.Log("NOT DONE");
     }

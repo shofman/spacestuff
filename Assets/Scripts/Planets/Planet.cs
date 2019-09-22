@@ -471,6 +471,17 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
         return defense;
     }
 
+    public bool isBlockaded() {
+        GameObject fleet = getFleetOverPlanet();
+        if (fleet != null) {
+            Debug.Log("fleet" + fleet.GetComponent<Fleet>().getAllegiance());
+            Debug.Log("planet" + getAllegiance());
+            return getAllegiance() == fleet.GetComponent<Fleet>().getAllegiance();
+        }
+
+        return false;
+    }
+
     /**
      * Transfers the fleet to the planet provided
      * @param  GameObject planetToMoveTo - The planet we want to move to 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 
-public class Fleet : MonoBehaviour, Observer {
+public class Fleet : MonoBehaviour, EndTurnObserver {
     public int speed = 8;
     List<GameObject> shipsInFleet;
 
@@ -19,7 +19,7 @@ public class Fleet : MonoBehaviour, Observer {
     private int travelRemaining = 100;
     
     void Awake() {
-        EndTurnNotifier.instance().addObserver(this);
+        EndTurnNotifier.instance().addEndTurnObserver(this);
         shipsInFleet = new List<GameObject>();
         planets = new List<GameObject>();
         orbitingPlanet = null;
@@ -42,9 +42,8 @@ public class Fleet : MonoBehaviour, Observer {
 
     /**
      * Returns the current allegiance of the fleet
-     * TODO - replace with Allegiances once that feature has been implemented
      */
-    public Color getFleetAllegiance() {
+    public Color getAllegiance() {
         return allegiance;
     }
 
@@ -181,12 +180,12 @@ public class Fleet : MonoBehaviour, Observer {
      * Determines whether there is a fleet already present at the newly arrived planet
      * @return bool - Whether or not there is an enemy fleet at the current planet
      */
-    private bool isEnemyFleetAtPlanet() {
+    public bool isEnemyFleetAtPlanet() {
         List<GameObject> possibleFleets = getVisitingPlanetFleets();
         if (possibleFleets.Any()) {
             //TODO - Just checking the first one. If there is a concept of alliances, and multiple types on planet, may need more
-            Color otherFleetAllegiance = possibleFleets[0].GetComponent<Fleet>().getFleetAllegiance();
-            return otherFleetAllegiance != getFleetAllegiance();
+            Color otherFleetAllegiance = possibleFleets[0].GetComponent<Fleet>().getAllegiance();
+            return otherFleetAllegiance != getAllegiance();
         }
         return false;
     }
@@ -236,10 +235,7 @@ public class Fleet : MonoBehaviour, Observer {
         travelRemaining = getSlowestShipDistance();
     }
 
-    /**
-     * Implemented as part of Observer, is called when end of turn happens
-     */
-    public void onNotify() {
+    public void onEndTurnNotify() {
         resetTravel();
     }
 }

@@ -54,7 +54,7 @@ public class Display : MonoBehaviour, ITabDisplayInterface, PlanetObserver {
     /**
     * Triggered when the selected planet changes
     */
-    public void onPlanetChange(GameObject newPlanet) {
+    public virtual void onPlanetChange(GameObject newPlanet) {
         planetToDisplay = newPlanet;
     }
 }

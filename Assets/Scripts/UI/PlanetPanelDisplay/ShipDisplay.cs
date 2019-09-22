@@ -4,7 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-public class ShipDisplay : Display {
+public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver {
+    public GameObject createShipButton;
     public GameObject moveShipButton;
     public GameObject shipDisplayScrollbar;
 
@@ -18,11 +19,19 @@ public class ShipDisplay : Display {
     private bool showingShipScrollbar;
     private GameObject chosenFleet;
 
+    private Player currentPlayer;
+
     protected override void Awake() {
         base.Awake();
+
+        CurrentPlayer.instance().addPlayerChangeObserver(this);
+        PlanetChangeNotifier.instance().addObserver(this);
+
         shipDisplayScrollbar.SetActive(false);
         showingShipScrollbar = false;
         chosenFleet = null;
+
+        currentPlayer = CurrentPlayer.instance().getCurrentPlayer();
     }
 
     /**
@@ -212,5 +221,31 @@ public class ShipDisplay : Display {
         RectTransform rect = child.GetComponent<RectTransform>();
         rect.localScale = Vector3.one;
         rect.localPosition = Vector3.zero;
+    }
+
+    private void updatePlanetDisplay() {
+        currentPlayer = CurrentPlayer.instance().getCurrentPlayer();
+
+        Planet currentPlanet = getPlanet().GetComponent<Planet>();
+
+        bool isPlayerOwned = currentPlayer.getAllegiance() == currentPlanet.getAllegiance();
+        bool isBlockaded = currentPlanet.isBlockaded();
+
+        if (isPlayerOwned && !isBlockaded) {
+            createShipButton.SetActive(true);
+            moveShipButton.SetActive(true);
+        } else {
+            createShipButton.SetActive(false);
+            moveShipButton.SetActive(false);
+        }
+    }
+
+    public void onChangePlayerNotify() {
+        updatePlanetDisplay();
+    }
+
+    public override void onPlanetChange(GameObject newPlanet) {
+        base.onPlanetChange(newPlanet);
+        updatePlanetDisplay();
     }
 }
