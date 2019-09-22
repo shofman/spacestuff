@@ -41,7 +41,7 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver {
         if (getPlanet() != null) {
             bool hasCreatedShip = getPlanet().GetComponent<PlanetProduction>().createShip();
             if (hasCreatedShip) {
-                validateMoveShipButton();
+                validateShipButtons();
                 updateShipListingForPlanet();
             }
         }
@@ -139,14 +139,19 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver {
      * Validates whether or not we should show the move ship button
      * Disables it if we cannot move ships
      */
-    public void validateMoveShipButton() {
+    public void validateShipButtons() {
         if (getPlanet() != null) {
             List<GameObject> fleets = getFleets();
-            if (fleets.Any()) {
+            Planet currentPlanet = getPlanet().GetComponent<Planet>();
+            bool isBlockaded = currentPlanet.isBlockaded();
+            bool hasFriendlyFleet = fleets.Any(fleet => fleet.GetComponent<Fleet>().getAllegiance() == currentPlanet.getAllegiance());
+            if ((hasFriendlyFleet && !isBlockaded) || (!hasFriendlyFleet && isBlockaded)) {
                 moveShipButton.GetComponent<Button>().interactable = true;
             } else {
                 moveShipButton.GetComponent<Button>().interactable = false;
             }
+
+            createShipButton.GetComponent<Button>().interactable = !isBlockaded;
         }
     }
 
@@ -198,15 +203,22 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver {
         // Create fleet display
         GameObject fleetDisplay = (GameObject) Instantiate (fleetNameDisplay);
         setUIParent(fleetDisplay, fleetHolder);
-        fleetDisplay.GetComponent<Text>().text = "Fleet " + fleetIndex;
+        Text fleetText = fleetDisplay.GetComponent<Text>();
+
+        Fleet fleetScript = fleet.GetComponent<Fleet>();
+        fleetText.text = "Fleet " + fleetIndex;
+        fleetText.color = fleetScript.isInTransit() ? Color.white : fleetScript.getAllegiance();
         fleetDisplay.GetComponent<FleetInteractions>().setParentDisplay(gameObject, fleet);
 
         // Attach list of ships to fleet display
-        List<GameObject> ships = fleet.GetComponent<Fleet>().listShipsInFleet();
+        List<GameObject> ships = fleetScript.listShipsInFleet();
         foreach (var ship in ships) {
             GameObject shipName = (GameObject) Instantiate (shipNameDisplay);
             setUIParent(shipName, fleetDisplay);
-            shipName.GetComponent<Text>().text = ship.GetComponent<Ship>().getName();
+            Text shipText = shipName.GetComponent<Text>();
+            Ship shipScript = ship.GetComponent<Ship>();
+            shipText.text = shipScript.getName();
+            shipText.color = shipScript.isInTransit() ? Color.white : fleetScript.getAllegiance();
         }
     }
 
@@ -224,18 +236,18 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver {
     }
 
     private void updatePlanetDisplay() {
-        currentPlayer = CurrentPlayer.instance().getCurrentPlayer();
-
         GameObject possiblePlanet = getPlanet();
-
         if (possiblePlanet == null) {
             return;
         }
 
         Planet currentPlanet = possiblePlanet.GetComponent<Planet>();
+        currentPlayer = CurrentPlayer.instance().getCurrentPlayer();
 
         bool isPlayerOwned = currentPlayer.getAllegiance() == currentPlanet.getAllegiance();
         bool isBlockaded = currentPlanet.isBlockaded();
+
+        Debug.Log("isOnwed" + isPlayerOwned + "  isB " + isBlockaded);
 
         if (isPlayerOwned && !isBlockaded) {
             createShipButton.SetActive(true);

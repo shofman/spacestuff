@@ -26,21 +26,12 @@ public class MoveShipsCommand : ICommand {
 
     // TODO - Make this not be fixed to only be the first entry
     origin.removeFleet(0);
+    Debug.Log("We are moving ships from " + origin.getName() + " to " + destinationPlanet.GetComponent<Planet>().getName());
   }
 
   public void execute() {
     if (EndTurnNotifier.instance().getCurrentTurnCount() >= arrivalTime) {
       fleetToMove.GetComponent<Fleet>().setFinishedTransit();
-
-      // Planet origin =  originPlanet.GetComponent<Planet>();
-      // Planet destination = destinationPlanet.GetComponent<Planet>();
-
-
-
-      // Debug.Log("We are moving ships from " + origin.getName() + " to " + destination.getName());
-
-      // // TODO - We should pass along the fleet here, but it's throwing a NULL pointer exception
-      // origin.moveFleet(destinationPlanet);
       isCompleted = true;
     }
   }

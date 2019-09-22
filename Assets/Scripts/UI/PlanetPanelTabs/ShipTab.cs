@@ -37,6 +37,6 @@ public class ShipTab : Tab {
 	 */
 	public override void enableDisplay() {
 		getEnablingScript().enableDisplay();
-		shipTabDisplay.GetComponent<ShipDisplay>().validateMoveShipButton();
+		shipTabDisplay.GetComponent<ShipDisplay>().validateShipButtons();
 	}
 }

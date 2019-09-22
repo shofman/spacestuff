@@ -50,9 +50,7 @@ public class CurrentPlayer : EndTurnObserver
         }
     }
 
-    private void changePlayer() {
-        triggerPlayerCommandsBeforeSwitching();
-
+    public void changePlayer() {
         playerIndex += 1;
 
         if (playerIndex >= listOfPlayers.Length) {
@@ -71,7 +69,7 @@ public class CurrentPlayer : EndTurnObserver
     }
 
     public void onEndTurnNotify() {
-        changePlayer();
+        triggerPlayerCommandsBeforeSwitching();
     }
 
     public Player getCurrentPlayer() {

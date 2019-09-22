@@ -17,6 +17,8 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
     private Color allegiance;
 
     private int travelRemaining = 100;
+
+    private bool inTransit = false;
     
     void Awake() {
         EndTurnNotifier.instance().addEndTurnObserver(this);
@@ -26,7 +28,7 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
     }
 
     void Update() {
-        moveShips();
+        // moveShips();
         if (Input.GetKeyDown("d")) {
             listPlanet();
         }
@@ -113,7 +115,7 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
         planets = listOfPlanets.ToList();
 
         int arrivalTime = EndTurnNotifier.instance().getCurrentTurnCount();
-        // TODO - make this calculation take into account enemy planets and speed of items in fleet
+        // TODO - make this calculation take into account the speed of items in fleet
         Color fleetAllegiance = getAllegiance();
         foreach (GameObject go in listOfPlanets) {
             if (go.GetComponent<Planet>().getAllegiance() == fleetAllegiance) {
@@ -123,8 +125,6 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
             }
         }
         return arrivalTime;
-        // }
-        // return 
     }
 
     /**
@@ -147,11 +147,13 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
 
     public void teleportToPlanet(GameObject newPlanet) {
         orbitPlanet(newPlanet);
+        setFleetPosition(newPlanet.transform.position);
         newPlanet.GetComponent<Planet>().setFleet(this.gameObject);
         setInTransit();
     }
 
     public void setInTransit() {
+        inTransit = true;
         foreach (GameObject ship in shipsInFleet) {
             ship.GetComponent<Ship>().setInTransit(true);
         }
@@ -161,6 +163,11 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
         foreach (GameObject ship in shipsInFleet) {
             ship.GetComponent<Ship>().setInTransit(false);
         }
+        inTransit = false;
+    }
+
+    public bool isInTransit() {
+        return inTransit;
     }
 
     /**

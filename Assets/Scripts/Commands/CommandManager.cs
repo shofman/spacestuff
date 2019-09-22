@@ -19,5 +19,7 @@ public class CommandManager {
     foreach(ICommand command in _commands.Where(command => !command.isCompleted)) {
       command.execute();
     }
+
+    _commands.RemoveAll(command => command.isCompleted == true);
   }
 }

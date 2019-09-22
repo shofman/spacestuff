@@ -12,9 +12,10 @@ public class Ship : MonoBehaviour {
 
     protected GameObject fleet;
     protected Color allegiance;
+    protected bool isTransiting;
 
     void Awake() {
-
+        isTransiting = false;
     }
 
     protected virtual void Start() {
@@ -22,7 +23,7 @@ public class Ship : MonoBehaviour {
     }
 
     protected virtual void Update() {
-        if (fleet != null) {
+        if (fleet != null && !isTransiting) {
             transform.RotateAround(fleet.transform.position, Vector3.up, 20 * Time.deltaTime);
         }
     }
@@ -79,11 +80,16 @@ public class Ship : MonoBehaviour {
     }
 
     public void setInTransit(bool inTransit) {
+        isTransiting = inTransit;
         if (inTransit) {
             GetComponent<Renderer>().material.SetColor("_Color", Color.gray);
         } else {
             GetComponent<Renderer>().material.SetColor("_Color", allegiance);
         }
+    }
+
+    public bool isInTransit() {
+        return isTransiting;
     }
 
     /**

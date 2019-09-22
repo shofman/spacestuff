@@ -39,7 +39,7 @@ public class MoveFleet : MonoBehaviour, PlanetObserver {
                             chosenFleet,
                             currentlySelectedPlanet,
                             hitObject,
-                            player
+                            CurrentPlayer.instance().getCurrentPlayerGameObject()
                         );
                     } else {
                         // TODO - Figure out how to handle selecting which fleet to go
@@ -48,10 +48,10 @@ public class MoveFleet : MonoBehaviour, PlanetObserver {
                             currentFleet,
                             currentlySelectedPlanet,
                             hitObject,
-                            player
+                            CurrentPlayer.instance().getCurrentPlayerGameObject()
                         );
                     }
-                    Player p = player.GetComponent<Player>();
+                    Player p = CurrentPlayer.instance().getCurrentPlayer();
                     p.addCommand(moveShips);
                     hitObject.GetComponent<Planet>().setTransferingFleet(true); // Don't show the player menu
                 }

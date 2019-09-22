@@ -13,4 +13,8 @@ public class ChangePlayerDisplay : MonoBehaviour {
   public void setAllegianceColor(Color c) {
     txt.color = c;
   }
+
+  public void triggerPlayerChange() {
+    CurrentPlayer.instance().changePlayer();
+  }
 }

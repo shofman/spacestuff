@@ -368,7 +368,7 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
      */
     public void setFleet(GameObject fleet) {
         fleetOverPlanet.Add(fleet);
-        shipDisplay.GetComponent<ShipDisplay>().validateMoveShipButton();
+        shipDisplay.GetComponent<ShipDisplay>().validateShipButtons();
         shipDisplay.GetComponent<ShipDisplay>().updateShipListingForPlanet();
     }
 
@@ -378,7 +378,7 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     public void removeFleet(int index) {
         try {
             fleetOverPlanet.RemoveAt(index);
-            shipDisplay.GetComponent<ShipDisplay>().validateMoveShipButton();
+            shipDisplay.GetComponent<ShipDisplay>().validateShipButtons();
         } catch (ArgumentOutOfRangeException e) {
             Debug.Log("Trying to remove fleet that does not exist");
             Debug.Log(e.ToString());
@@ -474,7 +474,8 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     public bool isBlockaded() {
         GameObject fleet = getFleetOverPlanet();
         if (fleet != null) {
-            return getAllegiance() == fleet.GetComponent<Fleet>().getAllegiance();
+            Fleet fleetScript = fleet.GetComponent<Fleet>();
+            return getAllegiance() != fleetScript.getAllegiance() && !fleetScript.isInTransit();
         }
 
         return false;
