@@ -11,11 +11,12 @@ public class TurnDisplay : MonoBehaviour, ChangePlayerObserver {
 	int turnCount = 0;
 
 	float baseTimeInTurn = 36;
-	int speedModifier = 1;
+	int speedModifier = 1; // Can adjust this if we want to decouple the Time.timeScale to avoid having animations look poor
 	float currentTurnTime;
 
 	void Awake() {
 		currentTurnTime = baseTimeInTurn;
+		// EndTurnNotifier.instance().addEndTurnObserver(this);
 		CurrentPlayer.instance().addPlayerChangeObserver(this);
 		txt = gameObject.GetComponent<Text>();
 		updateCount();
@@ -24,9 +25,10 @@ public class TurnDisplay : MonoBehaviour, ChangePlayerObserver {
 	}
 		    
   void Update() {
-      currentTurnTime -= Time.deltaTime * speedModifier;
-
-      if(currentTurnTime < 0) {
+      currentTurnTime -= Time.deltaTime * 1;
+      Debug.Log("current" + currentTurnTime);
+      if(currentTurnTime < 0)
+      {
           updateCount();
           currentTurnTime = baseTimeInTurn;
       }
@@ -43,6 +45,10 @@ public class TurnDisplay : MonoBehaviour, ChangePlayerObserver {
 	private void updatePlayerColor() {
 		ChangePlayerDisplay changeDisplay = PlayerTurnDisplay.GetComponent<ChangePlayerDisplay>();
 		changeDisplay.setAllegianceColor(CurrentPlayer.instance().getCurrentPlayer().getAllegiance());
+	}
+
+	public void changeTurnSpeed(Slider speedSlider) {
+		speedModifier = (int) speedSlider.value;
 	}
 
 	/**
