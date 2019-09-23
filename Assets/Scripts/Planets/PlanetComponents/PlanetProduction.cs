@@ -14,8 +14,6 @@ public class PlanetProduction : MonoBehaviour {
     public GameObject heavyCruiserObject;
     public GameObject troopTransportObject;
 
-    const string shipPrefix = "F3-";
-
     private Planet planet;
     private Color planetAllegiance;
     private GameObject shipTypeToCreate;
@@ -79,7 +77,6 @@ public class PlanetProduction : MonoBehaviour {
         matchingPlayer.spendMoney(shipCost);
 
         // Update ship with necessary variables
-        ship.setName(getShipName());
         ship.setAllegiance(planetAllegiance);
         
         // Add ship to fleet
@@ -92,24 +89,21 @@ public class PlanetProduction : MonoBehaviour {
         return true;
     }
 
-    // TODO - move this into the ship class itself
-    private string getShipName() {
-        // This needs to be initialized here to ensure each planet creates it's own random generator
-        RandomLetters shipNameGenerator = new RandomLetters(3);
-        String shipName = shipNameGenerator.generateString();
-        return shipPrefix + shipName;
+    private GameObject createFleet() {
+        GameObject fleet = (GameObject) Instantiate(fleetObject);
+        fleet.transform.position = gameObject.transform.position;
+        fleet.GetComponent<Fleet>().setFleetAllegiance(planetAllegiance);
+        fleet.GetComponent<Fleet>().orbitPlanet(gameObject);
+        planet.setFleet(fleet);
+        return fleet;
     }
 
     private GameObject findOrCreateFleet(List<GameObject> fleets) {
-        if (!fleets.Any()) {
-            GameObject fleet = (GameObject) Instantiate(fleetObject);
-            fleet.transform.position = gameObject.transform.position;
-            fleet.GetComponent<Fleet>().setFleetAllegiance(planetAllegiance);
-            fleet.GetComponent<Fleet>().orbitPlanet(gameObject);
-            planet.setFleet(fleet);
-            return fleet;
-        } else {
-            return fleets[0];
+        try {
+            return fleets.First(fleet => !fleet.GetComponent<Fleet>().isInTransit() && fleet.GetComponent<Fleet>().getAllegiance() == planetAllegiance);
         }
+        catch (InvalidOperationException) {}
+        catch (ArgumentNullException) {} // Do nothing - we will just create a fleet normally
+        return createFleet();
     }
 }

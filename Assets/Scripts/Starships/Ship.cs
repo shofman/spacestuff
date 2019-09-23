@@ -10,6 +10,8 @@ public class Ship : MonoBehaviour {
     public int distance = 3;
     public string shipName = "";
 
+    const string shipPrefix = "F3-";
+
     protected GameObject fleet;
     protected Color allegiance;
     protected bool isTransiting;
@@ -19,7 +21,7 @@ public class Ship : MonoBehaviour {
     }
 
     protected virtual void Start() {
-
+        setName(getShipName());
     }
 
     protected virtual void Update() {
@@ -98,5 +100,12 @@ public class Ship : MonoBehaviour {
     public virtual int Cost
     {
         get { return 100; }
+    }
+
+    protected string getShipName() {
+        // This needs to be initialized here to ensure each planet creates it's own random generator
+        RandomLetters shipNameGenerator = new RandomLetters(3);
+        String shipName = shipNameGenerator.generateString();
+        return shipPrefix + shipName;
     }
 }

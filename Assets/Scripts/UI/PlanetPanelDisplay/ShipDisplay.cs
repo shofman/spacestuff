@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver {
+public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver, EndTurnObserver {
     public GameObject createShipButton;
     public GameObject moveShipButton;
     public GameObject shipDisplayScrollbar;
@@ -26,6 +26,7 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver {
 
         CurrentPlayer.instance().addPlayerChangeObserver(this);
         PlanetChangeNotifier.instance().addObserver(this);
+        TurnHandler.instance().addEndTurnObserver(this);
 
         shipDisplayScrollbar.SetActive(false);
         showingShipScrollbar = false;
@@ -259,6 +260,11 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver {
                 moveShipButton.SetActive(false);
             }
         }
+    }
+
+    public void onEndTurnNotify() {
+        updatePlanetDisplay();
+        updateShipListingForPlanet();
     }
 
     public void onChangePlayerNotify() {
