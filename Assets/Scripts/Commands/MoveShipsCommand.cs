@@ -30,7 +30,7 @@ public class MoveShipsCommand : ICommand {
   }
 
   public void execute() {
-    if (EndTurnNotifier.instance().getCurrentTurnCount() >= arrivalTime) {
+    if (TurnHandler.instance().getCurrentTurnCount() >= arrivalTime) {
       fleetToMove.GetComponent<Fleet>().setFinishedTransit();
       isCompleted = true;
     }

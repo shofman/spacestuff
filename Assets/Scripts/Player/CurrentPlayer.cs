@@ -33,7 +33,7 @@ public class CurrentPlayer : EndTurnObserver
      * Constructor - set to private to prevent accidental use
      */
     private CurrentPlayer() {
-        EndTurnNotifier.instance().addEndTurnObserver(this);
+        TurnHandler.instance().addEndTurnObserver(this);
         listOfPlayers = GameObject.FindGameObjectsWithTag("Player").OrderBy(gameObject => gameObject.GetComponent<Player>().TurnOrder).ToArray();
 
         currentPlayer = listOfPlayers[0];

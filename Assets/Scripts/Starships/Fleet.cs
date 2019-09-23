@@ -21,7 +21,7 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
     private bool inTransit = false;
     
     void Awake() {
-        EndTurnNotifier.instance().addEndTurnObserver(this);
+        TurnHandler.instance().addEndTurnObserver(this);
         shipsInFleet = new List<GameObject>();
         planets = new List<GameObject>();
         orbitingPlanet = null;
@@ -114,7 +114,7 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
 
         planets = listOfPlanets.ToList();
 
-        int arrivalTime = EndTurnNotifier.instance().getCurrentTurnCount();
+        int arrivalTime = TurnHandler.instance().getCurrentTurnCount();
         // TODO - make this calculation take into account the speed of items in fleet
         Color fleetAllegiance = getAllegiance();
         foreach (GameObject go in listOfPlanets) {

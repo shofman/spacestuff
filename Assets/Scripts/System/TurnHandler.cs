@@ -3,12 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 
 //Invokes the notificaton method
-public class EndTurnNotifier
+public class TurnHandler
 {
     /**
      * Singleton pattern - we want only one instance of a end turn notifier per game
      */
-    private static EndTurnNotifier _instance;
+    private static TurnHandler _instance;
 
     int currentTurnCount = 0;
 
@@ -20,9 +20,9 @@ public class EndTurnNotifier
     /**
      * Statically access the end of turn notifier
      */
-    public static EndTurnNotifier instance() {
+    public static TurnHandler instance() {
         if (_instance == null) {
-            _instance = new EndTurnNotifier();
+            _instance = new TurnHandler();
         }
         return _instance;
     }
@@ -30,7 +30,7 @@ public class EndTurnNotifier
     /**
      * Constructor - set to private to prevent accidental use
      */
-    private EndTurnNotifier() {
+    private TurnHandler() {
         currentTurnCount++;
     }
 
@@ -39,7 +39,7 @@ public class EndTurnNotifier
     }
 
     //Send notifications if something has happened
-    public void notify()
+    public void notifyEndOfTurn()
     {
         currentTurnCount++;
         for (int i = 0; i < observers.Count; i++)

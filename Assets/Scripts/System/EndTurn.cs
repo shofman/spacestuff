@@ -8,7 +8,7 @@ public class EndTurn : MonoBehaviour
     /**
      * Attachable script so that end turn notifier can be called from clicking button
      */
-    public void callEndTurnNotifier() {
-        EndTurnNotifier.instance().notify();
+    public void endTurn() {
+        TurnHandler.instance().notifyEndOfTurn();
     }
 }

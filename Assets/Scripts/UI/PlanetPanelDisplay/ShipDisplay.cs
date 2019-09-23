@@ -247,8 +247,6 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver {
         bool isPlayerOwned = currentPlayer.getAllegiance() == currentPlanet.getAllegiance();
         bool isBlockaded = currentPlanet.isBlockaded();
 
-        Debug.Log("isOnwed" + isPlayerOwned + "  isB " + isBlockaded);
-
         if (isPlayerOwned && !isBlockaded) {
             createShipButton.SetActive(true);
             moveShipButton.SetActive(true);

@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-public class TurnDisplay : MonoBehaviour, ChangePlayerObserver {
+public class TurnDisplay : MonoBehaviour, ChangePlayerObserver, EndTurnObserver {
 	public GameObject PlayerTurnDisplay;
 
 	Text txt;
@@ -17,6 +17,8 @@ public class TurnDisplay : MonoBehaviour, ChangePlayerObserver {
 		currentTurnTime = baseTimeInTurn;
 
 		CurrentPlayer.instance().addPlayerChangeObserver(this);
+    TurnHandler.instance().addEndTurnObserver(this);
+
 		txt = gameObject.GetComponent<Text>();
 		updateCount();
 
@@ -26,9 +28,7 @@ public class TurnDisplay : MonoBehaviour, ChangePlayerObserver {
   void Update() {
       currentTurnTime -= Time.deltaTime * 1;
       if(currentTurnTime < 0) {
-		      EndTurnNotifier.instance().notify();
-          updateCount();
-          currentTurnTime = baseTimeInTurn;
+		      TurnHandler.instance().notifyEndOfTurn();
       }
   }
 
@@ -36,7 +36,7 @@ public class TurnDisplay : MonoBehaviour, ChangePlayerObserver {
 	 * Increments the turn count 
 	 */
 	private void updateCount() {
-		txt.text = "Turn: " + EndTurnNotifier.instance().getCurrentTurnCount();
+		txt.text = "Turn: " + TurnHandler.instance().getCurrentTurnCount();
 	}
 
 	private void updatePlayerColor() {
@@ -52,4 +52,9 @@ public class TurnDisplay : MonoBehaviour, ChangePlayerObserver {
 	public void onChangePlayerNotify() {
     updatePlayerColor();
 	}
+
+  public void onEndTurnNotify() {
+    updateCount();
+    currentTurnTime = baseTimeInTurn;
+  }
 }
