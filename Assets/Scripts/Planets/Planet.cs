@@ -224,7 +224,8 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
             LineRenderer line = lineRenderer.GetComponent<LineRenderer>();
             line.SetPosition(0, currPosition);
             line.SetPosition(1, targetPosition);
-            line.SetWidth(lineWidth,lineWidth);
+            line.startWidth = lineWidth;
+            line.endWidth = lineWidth;
         }
     }
 
@@ -239,7 +240,8 @@ public class Planet : MonoBehaviour, IPointerClickHandler, IBreadthFirstSearchIn
     public void setLineColor(Color c) {
         foreach(GameObject lineRenderer in listOfRoutes) {
             LineRenderer line = lineRenderer.GetComponent<LineRenderer>();
-            line.SetColors(c,c);
+            line.startColor = c;
+            line.endColor = c;
         }
     }
 

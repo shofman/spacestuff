@@ -4,7 +4,6 @@ using System.Collections;
 
 public class ResourceDisplay : MonoBehaviour {
     private Text txt;
-    private int display = 0;
 
     const string resourcePrefix = "Money: ";
 

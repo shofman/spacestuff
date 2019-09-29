@@ -13,7 +13,7 @@ public class FleetInteractions : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     private bool pointerDown;
     private float pointerDownTimer;
-    private float requiredHoldTime = 1;
+    private float requiredHoldTime = 0.5f;
 
     private Image fleetBorder;
     private BoxCollider2D collisionDetector;
@@ -58,9 +58,15 @@ public class FleetInteractions : MonoBehaviour, IPointerDownHandler, IPointerUpH
       // https://answers.unity.com/questions/1082179/mouse-drag-element-inside-scrollrect-throws-pointe.html
     }
 
+    private bool canTransferFleet(Fleet currentFleet, Fleet fleetToMergeInto) {
+      return fleetToMergeInto.getAllegiance() == currentFleet.getAllegiance() && !fleetToMergeInto.isInTransit();
+    }
+
     public void OnPointerUp(PointerEventData eventData) {
       string fleetName = gameObject.GetComponentsInChildren<Text>()[0].text;
-      if (collidedElements.Count > 0) {
+      Fleet currentFleet = this.fleet.GetComponent<Fleet>();
+
+      if (collidedElements.Count > 0 && !currentFleet.isInTransit()) {
         float smallestSize = float.PositiveInfinity;
         Collider2D smallestCollider = null;
 
@@ -73,17 +79,14 @@ public class FleetInteractions : MonoBehaviour, IPointerDownHandler, IPointerUpH
           }
         }
 
-        // TODO - perform checks here to make sure that the fleet in question is not in transit / enemy ship
-
         Fleet fleetToMergeInto = smallestCollider.gameObject.GetComponent<FleetInteractions>().getFleet().GetComponent<Fleet>();
-        Fleet currentFleet = this.fleet.GetComponent<Fleet>();
 
-        fleetToMergeInto.transferShipsToFleet(currentFleet.getShipsInFleet());
-
-        currentFleet.destroyFleet();
-        Destroy(gameObject);
-
-        this.shipDisplay.GetComponent<ShipDisplay>().toggleDisplayShipsOnPlanet(true);
+        if (canTransferFleet(currentFleet, fleetToMergeInto)) {
+          fleetToMergeInto.transferShipsToFleet(currentFleet.getShipsInFleet());
+          currentFleet.destroyFleet();
+          Destroy(gameObject);
+          this.shipDisplay.GetComponent<ShipDisplay>().toggleDisplayShipsOnPlanet(true);
+        }
       }
 
       if (isDragging) {
