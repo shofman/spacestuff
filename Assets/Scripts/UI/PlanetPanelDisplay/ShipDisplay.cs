@@ -147,7 +147,8 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver, EndTur
             bool isBlockaded = currentPlanet.isBlockaded();
             bool hasFriendlyFleet = fleets.Any(fleet => fleet.GetComponent<Fleet>().getAllegiance() == currentPlanet.getAllegiance());
             if ((hasFriendlyFleet && !isBlockaded) || (!hasFriendlyFleet && isBlockaded)) {
-                moveShipButton.GetComponent<Button>().interactable = true;
+                bool hasAMovableFleet = fleets.Any(fleet => !fleet.GetComponent<Fleet>().isInTransit());
+                moveShipButton.GetComponent<Button>().interactable = hasAMovableFleet;
             } else {
                 moveShipButton.GetComponent<Button>().interactable = false;
             }
@@ -260,6 +261,8 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver, EndTur
                 moveShipButton.SetActive(false);
             }
         }
+
+        validateShipButtons();
     }
 
     public void onEndTurnNotify() {

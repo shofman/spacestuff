@@ -13,7 +13,7 @@ public class FleetInteractions : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     private bool pointerDown;
     private float pointerDownTimer;
-    private float requiredHoldTime = 0.5f;
+    private float requiredHoldTime = 0.3f;
 
     private Image fleetBorder;
     private BoxCollider2D collisionDetector;
