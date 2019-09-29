@@ -65,6 +65,28 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
     }
 
     /**
+     * Adds a list of ships into this fleet
+     * @param List<GameObject> ships - The list of ships we want to add to this fleet
+     */
+    public void addShipsToFleet(List<GameObject> ships) {
+        foreach(GameObject ship in ships) {
+            addShipToFleet(ship);
+        }
+    }
+
+    /**
+     * Transfer a list of ships into this fleet
+     * @param List<GameObject> ships - the list of ships we want to add to this fleet
+     */
+    public void transferShipsToFleet(List<GameObject> ships) {
+        foreach(GameObject ship in ships) {
+            Methods.addGameObjectAsChild(gameObject, ship);
+            ship.transform.position = gameObject.transform.position;
+            addShipToFleet(ship);
+        }
+    }
+
+    /**
      * Lists off all the ships in this fleet by name
      */
     public List<GameObject> listShipsInFleet() {

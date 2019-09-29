@@ -204,7 +204,7 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver, EndTur
         // Create fleet display
         GameObject fleetDisplay = (GameObject) Instantiate (fleetNameDisplay);
         setUIParent(fleetDisplay, fleetHolder);
-        Text fleetText = fleetDisplay.GetComponent<Text>();
+        Text fleetText = fleetDisplay.GetComponentInChildren<Text>();
 
         Fleet fleetScript = fleet.GetComponent<Fleet>();
         fleetText.text = "Fleet " + fleetIndex;
