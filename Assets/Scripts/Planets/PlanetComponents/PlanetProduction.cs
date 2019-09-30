@@ -84,7 +84,6 @@ public class PlanetProduction : MonoBehaviour {
         Methods.addGameObjectAsChild(fleet, newShip);
         newShip.transform.position = new Vector3(gameObject.transform.position.x + 6, gameObject.transform.position.y, gameObject.transform.position.z);
         fleet.GetComponent<Fleet>().addShipToFleet(newShip);
-        
 
         return true;
     }

@@ -18,11 +18,10 @@ public class Ship : MonoBehaviour {
 
     void Awake() {
         isTransiting = false;
-    }
-
-    protected virtual void Start() {
         setName(getShipName());
     }
+
+    protected virtual void Start() {}
 
     protected virtual void Update() {
         if (fleet != null && !isTransiting) {
