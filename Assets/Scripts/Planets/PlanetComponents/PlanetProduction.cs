@@ -16,11 +16,9 @@ public class PlanetProduction : MonoBehaviour {
 
     private Planet planet;
     private Color planetAllegiance;
-    private GameObject shipTypeToCreate;
     private GameObject[] listOfPlayers;
 
     void Awake() {
-        shipTypeToCreate = fighterObject;
         listOfPlayers = GameObject.FindGameObjectsWithTag("Player");
     }
 
@@ -29,22 +27,11 @@ public class PlanetProduction : MonoBehaviour {
         planetAllegiance = planet.getAllegiance();
     }
 
-    void Update() {
-        if (Input.GetKeyDown("f")) {
-            Debug.Log("Making fighters");
-            shipTypeToCreate = fighterObject;
-        } else if (Input.GetKeyDown("h")) {
-            Debug.Log("Making heavy cruisers");
-            shipTypeToCreate = heavyCruiserObject;
-        }
-    }
-
     /**
      * Creates a ship
      * Either creates a new fleet if no ships are present, or adds the new ship to a fleet
-     *
      */
-    public bool createShip() {
+    public bool createShip(GameObject shipTypeToCreate) {
         // For now, find the player whose allegiance this planet belongs to. in the future, change this to be passed in as a dependency
         // Check if ship can be created (allegiance differences / too little money)
         bool isMatchingPlayer = false;

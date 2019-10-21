@@ -11,6 +11,9 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver, EndTur
 
     public GameObject mouse;
 
+    public GameObject defaultScreen;
+    public GameObject buildShipScreen;
+
     // Fleet and ship display objects
     public GameObject fleetHolder;
     public GameObject fleetNameDisplay;
@@ -34,17 +37,34 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver, EndTur
 
         currentPlayer = CurrentPlayer.instance().getCurrentPlayer();
     }
-
     /**
      * Create a single ship from a button
      */
-    public void createShipFromButton() {
+    public void createShip(GameObject shipType) {
+        bool hasCreatedShip = getPlanet().GetComponent<PlanetProduction>().createShip(shipType);
+        if (hasCreatedShip) {
+            validateShipButtons();
+            updateShipListingForPlanet();
+        }    
+    }
+
+    /**
+     * Switch to the view responsible for creating ships
+     */
+    public void switchToShipyardView() {
         if (getPlanet() != null) {
-            bool hasCreatedShip = getPlanet().GetComponent<PlanetProduction>().createShip();
-            if (hasCreatedShip) {
-                validateShipButtons();
-                updateShipListingForPlanet();
-            }
+            defaultScreen.SetActive(false);
+            buildShipScreen.SetActive(true);
+        }
+    }
+
+    /**
+     * Switch to the overview of all things relating to ships
+     */
+    public void switchToOverview() {
+        if (getPlanet() != null) {
+            buildShipScreen.SetActive(false);
+            defaultScreen.SetActive(true);
         }
     }
 
@@ -220,7 +240,10 @@ public class ShipDisplay : Display, ChangePlayerObserver, PlanetObserver, EndTur
             Text shipText = shipName.GetComponent<Text>();
             Ship shipScript = ship.GetComponent<Ship>();
             shipText.text = shipScript.getName();
-            shipText.color = shipScript.isInTransit() ? Color.white : fleetScript.getAllegiance();
+            shipText.color = 
+                shipScript.isInTransit() ? Color.white : 
+                shipScript.isUnderConstruction() ? Color.yellow :
+                fleetScript.getAllegiance();
         }
     }
 

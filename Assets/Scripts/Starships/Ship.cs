@@ -10,21 +10,23 @@ public class Ship : MonoBehaviour {
     public int distance = 3;
     public string shipName = "";
 
-    const string shipPrefix = "F3-";
+    protected string shipPrefix = "S-";
 
     protected GameObject fleet;
     protected Color allegiance;
     protected bool isTransiting;
+    protected bool isBuilding;
 
     void Awake() {
         isTransiting = false;
+        isBuilding = true;
         setName(getShipName());
     }
 
     protected virtual void Start() {}
 
     protected virtual void Update() {
-        if (fleet != null && !isTransiting) {
+        if (fleet != null && !isTransiting && !isBuilding) {
             transform.RotateAround(fleet.transform.position, Vector3.up, 20 * Time.deltaTime);
         }
     }
@@ -54,7 +56,7 @@ public class Ship : MonoBehaviour {
     /**
      * Sets the name of this ship
      */
-    public void setName(string name) {
+    private void setName(string name) {
         this.shipName = name;
     }
 
@@ -93,18 +95,34 @@ public class Ship : MonoBehaviour {
         return isTransiting;
     }
 
+    public bool isUnderConstruction() {
+        return isBuilding;
+    }
+
+    public void finishConstruction() {
+        isBuilding = false;
+        GetComponent<Renderer>().material.SetColor("_Color", Color.yellow);
+    }
+
     /**
      * Returns the cost to build the ship
      */
-    public virtual int Cost
-    {
+    public virtual int Cost {
         get { return 100; }
+    }
+
+    public virtual int ConstructionDuration {
+        get { return 1000; }
     }
 
     protected string getShipName() {
         // This needs to be initialized here to ensure each planet creates it's own random generator
         RandomLetters shipNameGenerator = new RandomLetters(3);
         String shipName = shipNameGenerator.generateString();
-        return shipPrefix + shipName;
+        return getShipPrefix() + shipName;
+    }
+
+    protected virtual string getShipPrefix() {
+        return this.shipPrefix;
     }
 }

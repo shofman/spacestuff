@@ -19,17 +19,22 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
     private int travelRemaining = 100;
 
     private bool inTransit = false;
+
+    private string fleetPrefix = "Fleet-";
+
+    public string fleetName;
     
     void Awake() {
         TurnHandler.instance().addEndTurnObserver(this);
         shipsInFleet = new List<GameObject>();
         planets = new List<GameObject>();
         orbitingPlanet = null;
+
+        fleetName = createFleetName();
     }
 
     void Update() {
-        // moveShips();
-        if (Input.GetKeyDown("d")) {
+        if (Input.GetKeyDown("p")) {
             listPlanet();
         }
     }
@@ -40,6 +45,10 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
      */
     public void setFleetAllegiance(Color c) {
         allegiance = c;
+    }
+
+    public string getFleetName() {
+        return fleetName;
     }
 
     /**
@@ -54,6 +63,7 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
      * @param Ship - the ship we want to add to this fleet
      */
     public void addShipToFleet(GameObject ship) {
+        if (ship == null) { return; }
         shipsInFleet.Add(ship);
         ship.GetComponent<Ship>().attachToFleet(this.gameObject);
         
@@ -156,6 +166,7 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
         if (orbitingPlanet != null) {
             orbitingPlanet.GetComponent<Planet>().removeFleet(gameObject);
         }
+        shipsInFleet.Clear();
         Destroy(gameObject);
     }
 
@@ -181,6 +192,9 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
         }
     }
 
+    /**
+     * Sets the transit status to false for this fleet and all of its ships
+     */
     public void setFinishedTransit() {
         foreach (GameObject ship in shipsInFleet) {
             ship.GetComponent<Ship>().setInTransit(false);
@@ -188,8 +202,16 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
         inTransit = false;
     }
 
+    /**
+     * Indicates whether this fleet is currently transiting between planets
+     */
     public bool isInTransit() {
         return inTransit;
+    }
+
+    public bool hasBuiltAllShips() {
+        // shipsInFleet.All(ship => ship.GetCompone)
+        return false;
     }
 
     /**
@@ -200,28 +222,16 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
     }
 
     /**
-     * Responsible for adjusting the position of the ship. Moves towards target destination
-     * Once there, checks to see if list of destinations is empty. If so, finish. Otherwise, pop entry
-     * and continue
+     * Calculates the strength of this fleet
+     * TODO - Add shield factor in here
      */
-    private void moveShips() {
-        if (isMoving && travelRemaining > 0) {
-            Vector3 position = newMovementTarget.transform.position;
-            if (gameObject.transform.position != position) {
-                float step = speed * Time.deltaTime;
-                setFleetPosition(Vector3.MoveTowards(gameObject.transform.position, position, step));
-            } else {
-                if (isEnemyFleetAtPlanet()) {
-                    isMoving = false;
-                    List<GameObject> possibleFleets = getVisitingPlanetFleets();
-
-                    // TODO - Address that we might be attacking multiple fleets
-                    engageEnemy(possibleFleets[0]);
-                } else {
-                    continueMovingOrStop();
-                }
-            }
+    private int calculateFleetStrength(Fleet fleet) {
+        List<GameObject> ships = fleet.getShipsInFleet();
+        int strength = 0;
+        foreach (GameObject ship in ships) {
+            strength += ship.GetComponent<Ship>().getAttack();
         }
+        return strength;
     }
 
     /**
@@ -259,14 +269,6 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
             return otherFleetAllegiance != getAllegiance();
         }
         return false;
-    }
-
-    /**
-     * Begins a combat with an enemy fleet
-     */
-    private void engageEnemy(GameObject enemyFleet) {
-        FleetCombat combat = new FleetCombat();
-        combat.resolveCombat(gameObject, enemyFleet);
     }
 
     /**
@@ -308,5 +310,12 @@ public class Fleet : MonoBehaviour, EndTurnObserver {
 
     public void onEndTurnNotify() {
         resetTravel();
+    }
+
+    private string createFleetName() {
+        // This needs to be initialized here to ensure each planet creates it's own random generator
+        RandomLetters fleetNameGenerator = new RandomLetters(5);
+        String fleetName = fleetNameGenerator.generateString();
+        return fleetPrefix + fleetName;
     }
 }

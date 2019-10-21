@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
 
 public class MoveShipsCommand : ICommand {
   public virtual bool isCompleted { get; set; }
@@ -29,10 +31,26 @@ public class MoveShipsCommand : ICommand {
     Debug.Log("We are moving ships from " + origin.getName() + " to " + destinationPlanet.GetComponent<Planet>().getName());
   }
 
+  private void resolveAnyFleetCombatFromArrivingShips() {
+    List<GameObject> fleetsAtPlanet = destinationPlanet.GetComponent<Planet>().getFleetsOverPlanet();
+    int numberOfValidFleets = fleetsAtPlanet
+      .Where(fleet => !fleet.GetComponent<Fleet>().isInTransit())
+      .GroupBy(fleet => fleet.GetComponent<Fleet>().getAllegiance())
+      .Distinct()
+      .Count();
+
+    if (numberOfValidFleets > 1) {
+      FleetCombat combat = new FleetCombat();
+      combat.resolveFleetBattleAbovePlanet(fleetsAtPlanet);
+    }
+
+  }
+
   public void execute() {
     if (TurnHandler.instance().getCurrentTurnCount() >= arrivalTime) {
       fleetToMove.GetComponent<Fleet>().setFinishedTransit();
       isCompleted = true;
+      resolveAnyFleetCombatFromArrivingShips();
     }
   }
 
